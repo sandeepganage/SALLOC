@@ -18,16 +18,15 @@ gpuVector is the custom implementation of vector.
 
 __global__
 void kernel1(gpuVector<unsigned> vec1) 
-// should vec1 be defined in another kernel?
-// or should kernel1 have an empty argument list?
+// how to declare a vector and specify the vector,to the kernel, on which push_back needs to be performed?
 {
   unsigned tid  = threadIdx.x + blockIdx.x * blockDim.x;
-  vec1.my_push_back(tid);
+  vec1.my_push_back(tid); // performing push_back on vec1.
 }
 
 int main(int argc, char** argv)
 {
   gpuVector vec; // on host
-  kernel1 <<<1,10>>> (vec); // or kernel1 <<<1,10>>>();
+  kernel1 <<<1,10>>>(); //or  kernel1 <<<1,10>>> (vec); 
   return 0;
 }
