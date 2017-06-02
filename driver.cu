@@ -27,6 +27,6 @@ void kernel1(gpuVector<unsigned> vec1)
 int main(int argc, char** argv)
 {
   gpuVector<unsigned> vec; // on host -- should it initialize the vector on the GPU?
-  kernel1 <<<1,10>>>(); //or  kernel1 <<<1,10>>> (vec); -- should this make vec1 an alias of vec? 
+  kernel1<<<1,10>>>(); //or  kernel1<<<1,10>>>(vec); -- should this make vec1 an alias of vec? 
   return 0;
 }
