@@ -50,6 +50,7 @@ class GPUChunk {
       int id = atomicAdd(&nextFreeValue, 1);
       if(id < CHUNK_SIZE) {
         //found space
+        printf("push_back succeeded!\n");
         values[id] = value;
         return true;
       } else {
@@ -87,7 +88,7 @@ class GPUArenaIterator {
     }
 
     __device__ 
-    T * get_next() {   /*The functionality of this device function is not clear*/
+    T * get_next() {   
       if(cursorInChunk < 0) {
         //No more elements left in chunk, go to next chunk
         //assuming there are more chunks because you hopefully called hasNext before
