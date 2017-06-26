@@ -19,3 +19,4 @@ Another code named "cuMalloc.cu" is present in the folder. This file contains co
  and run with the command: 
 	./cuMalloc
  
+Currently, arena allocator SALLOC only supports the push_back() operation. 
