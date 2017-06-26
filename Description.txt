@@ -1,0 +1,25 @@
+
+In the first phase of GSoC 2017, I have implemented a basic version of an arena allocator for CUDA.
+
+The arena only has support for push_back() operation.
+
+I have borrowed heavily from/recycled the implementation of GPU Arena Allocator (GPUArena.h) on git.
+
+A brief outline of the implementation is given below:
+1. An array of GPUChunks of size 'capacity' is preallocated from the CPU using a call to cudaMalloc().
+
+2. The arena is organized into 'layers' of 'chunks'. Each layer may consist of different number of chunks, which is to be specified by the user.
+
+3. A 'chunk' is an array of pointers of a predetermined size, CHUNK_SIZE. 
+
+4. The push_back() operation pushes an array to a location in a chunk, at a specified layer and chunkId.
+
+5. A shared variable 'nextFreeValue', keeps track of the next free location inside a chunk where the insertion can happen. 'nextFreeValue' is incremented using atomicAdd to avoid data race.
+
+6. Similarly, 'nextFreeChunk' is used to keep track of whether the capacity of the arena is exhausted or not.
+
+7. If a chunk gets full, but there are other chunks available, then a new chunk is requested. The different chunks are strung together in a linked-list.
+
+8. The chunks of a single layer are allocated space in a contiguous manner. To achieve this, a kernel computes the offset required to find the start index of a requested  chunk of memory in the arena. 
+
+9. To access an element or to iterate over the arena, GPUArenaIterator is written. By specifying the 'layer', 'chunkId' of a chunk, we can get to a chunk and then get to the desired vector.
