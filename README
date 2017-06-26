@@ -1,0 +1,21 @@
+
+This is the README file for SALLOC
+
+The code is compiled using CUDA 8.0 for NVIDIA Pascal (GeForce GTX 1080) GPU. GCC version used is 5.3.0.
+
+The source for arena allocator SALLOC is present in the file "salloc.h"
+There is a driver code named "driverprog.cu" which can be used to test the push_back() functionality of the allocator.
+
+The file 'driverprog.cu' can be compiled like so:
+	nvcc driverprog.cu -std=c++11 -o driverprog
+Further, it should be run with the command: 
+	./driverprog	
+The program outputs the time taken to allocate the requested memory.
+
+
+Another code named "cuMalloc.cu" is present in the folder. This file contains code for allocating memory using 'malloc()' function, supported by CUDA 8, from inside the GPU kernel.  The performance of SALLOC is compared with malloc() using this code. 
+'cuMalloc.cu' can be compiled like so:
+	nvcc cuMalloc.cu -o cuMalloc
+ and run with the command: 
+	./cuMalloc
+ 
