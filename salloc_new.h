@@ -21,6 +21,11 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 
 #define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
+
+
+
+
+
 //template <int CHUNK_SIZE, typename T>
 //class GPUChunk {
 //  public:
