@@ -16,7 +16,8 @@
 __global__ void kernel(GPUArena<NUM_LAYERS,CHUNK_SZ,int> ga1)
 {
    
-   int x[5]= {10,11,12,13,14}; // each thread pushs back an arrary and not a scalar
+   //int x[5]= {10,11,12,13,14}; // each thread pushs back an arrary and not a scalar
+   int x = 5;
    int _eleId = threadIdx.x; 
    int _layer = blockIdx.x;
    ga1.push_back(_layer,_eleId,x); 

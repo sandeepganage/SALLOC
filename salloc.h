@@ -24,7 +24,7 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 template <int CHUNK_SIZE, typename T>
 class GPUChunk {
   public:
-    T * values[CHUNK_SIZE];
+    T values[CHUNK_SIZE];
     int nextFreeValue;
     GPUChunk<CHUNK_SIZE, T> *next;
 
@@ -38,7 +38,7 @@ class GPUChunk {
     }
 
     __device__
-    bool push_back(T * value) {
+    bool push_back(T value) {
       int id = atomicAdd(&nextFreeValue, 1);
       if(id < CHUNK_SIZE) {
         printf("push_back succeeded!\n");
@@ -50,7 +50,7 @@ class GPUChunk {
     }
 
     __device__
-    T * get_element_at(int i) {
+    T get_element_at(int i) {
       return values[i];
     }
 };
@@ -65,7 +65,7 @@ class GPUArenaIterator { // iterator for the arena
     __device__
     GPUArenaIterator(GPUChunk<CHUNK_SIZE, T> *head_chunk) {
       currentChunk = head_chunk;
-      if(currentChunk != NULL) {  /*Not clear how currentChunk is updated*/
+      if(currentChunk != NULL) {  
         cursorInChunk = currentChunk->num_values_in_chunk() - 1; /* num_values_in_chunk() may be 0 as well  */
       }
     }
@@ -172,7 +172,7 @@ class GPUArena {
     }
 
     __device__
-    void push_back(int layer, int elementId, T* value) {
+    void push_back(int layer, int elementId, T value) {
 
       GPUChunk<CHUNK_SIZE, T> *currentChunk = get_head_chunk(layer, elementId);
       assert(currentChunk);
