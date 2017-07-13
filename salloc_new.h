@@ -8,6 +8,8 @@
 
 #define checkCudaError(val) __checkCudaError__ ( (val), #val, __FILE__, __LINE__ )
 
+
+
 template <typename T>
 inline void __checkCudaError__(T code, const char *func, const char *file, int line)
 {
@@ -21,9 +23,90 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 
 #define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
+// implementing with class
+
+template<int CHUNK_SZ, typename T>
+class Chunk {
+   public:
+     T values[CHUNK_SZ];
+     int count;
+     Chunk<CHUNK_SZ, T> *next;
+   
+   __device__
+   int numElements() {
+	if(count >= CHUNK_SZ)
+           return CHUNK_SZ;
+        else return count;
+   }
+};
+
+template<int CHUNK_SZ, typename T>
+class Arena {
+   private:
+      int capacity;
+   public:
+       Chunk<CHUNK_SZ, T> *chunks;
+       
+	/*creating arena*/
+       Arena(int _capacity) : capacity(_capacity)
+       {
+	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
+	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
+	}
+       
+};
 
 
 
+// implementing with struct
+
+//template<size_t chunk_sz, typename T>
+//struct GPUChunk {
+//
+//	 GPUChunk<chunk_sz, T> *next; // pointer to next chunk
+//	 size_t count; // count the number of spaces free in chunk
+//	 T values[chunk_sz]; // array to store the values. Each value is a scalar
+//};
+//
+//
+//template<size_t chunk_sz, typename T>
+//struct GPUArena {
+//
+//	GPUChunk<chunk_sz, T> *chunks;
+//
+//	GPUArena<chunk_sz, T> *  create(size_t capacity) {
+//	  checkCudaError(cudaMalloc((void**)&chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity ));
+//	 return 
+//	}
+//	  
+//};
+
+
+
+//template<int CHUNK_SIZE, typename T>
+//class GPUChunk {
+// public:
+//	 GPUChunk<CHUNK_SIZE, T> *next; // pointer to next chunk
+//	 int count; // count the number of spaces free in chunk
+//	 T values[CHUNK_SIZE]; // array to store the values. Each value is a scalar
+//};
+//
+//template<int CHUNK_SIZE, typename T>
+//class GPUArena {
+// private:
+//	int capacity;
+//	GPUChunk<CHUNK_SIZE, T> *chunks; // array of chunks
+//
+// public:
+// 	T* create(int _capacity) //: capacity(_capacity)
+//	{
+//	  capacity = _capacity;
+//	  checkCudaError(cudaMalloc((void**)&chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity ));
+//	  T* chunks_addr = chunks;
+//	  return chunks_addr;
+//	}
+// 		
+//};
 
 
 //template <int CHUNK_SIZE, typename T>
