@@ -34,7 +34,7 @@ int main(int argc, char** argv)
   if (err != cudaSuccess)
     printf("Error: %s\n", cudaGetErrorString(err));
 
-  printf("kernel2 done.\n");
   cudaDeviceSynchronize();
+  printf("kernel2 done.\n");
   return 0;
 }

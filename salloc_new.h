@@ -38,6 +38,28 @@ class Chunk {
            return CHUNK_SZ;
         else return count;
    }
+  
+  __device__ 
+   T getElement(int i)
+  {
+    return values[i];
+  }
+
+  /* this is push_back into a chunk. 
+   * It specifies the functionality once the chunk
+   * to be pushed into is specified 
+   */
+  __device__
+   bool push_back(T value) 
+   {
+     int id = atomicAdd(&count,1); // atomicAdd returns the oldVal. So id is count before incrementing  
+     if(id < CHUNK_SZ) {// space found
+       values[id] = value;
+       return true; // written successfully in the current chunk    
+     }
+     
+     else return false; 
+   }
 };
 
 template<int CHUNK_SZ, typename T>
@@ -51,7 +73,7 @@ class Arena {
        Arena(int _capacity) : capacity(_capacity)
        {
 	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
-	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
+	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ, int>) * capacity);
 	}
        
 };
