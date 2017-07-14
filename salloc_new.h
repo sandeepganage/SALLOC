@@ -75,6 +75,25 @@ class Arena {
 	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
 	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ, int>) * capacity);
 	}
+
+       /* Get_head_chunk() -- get the address of the starting chunk for 
+        * the vector concerned..
+        * We can follow the link from this chunk to push_back into the 
+        * other chunks.
+        * */
+       
+        /* Get_new_chunk -- 
+ 	*  Expose a new chunk from the arena to the user program  
+ 	*  by incrementinga counter
+ 	* */
+
+
+
+       /* push_back() -- push_back to the correct vector and chunk
+       *  [determine the chunk to which push_back has to happen]
+       *  Determine the condiiton for finding the new chunk etc.
+       * */      
+	
        
 };
 
