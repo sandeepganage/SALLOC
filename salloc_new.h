@@ -83,12 +83,12 @@ class Arena {
         * */
 	
 
-	
+	/*get_current_chunk() -- return the address of the chunk to perform push_back() in*/
 	
 		       
         /* Get_new_chunk -- 
  	*  Expose a new chunk from the arena to the user program  
- 	*  by incrementinga counter
+ 	*  by incrementing a counter
  	* */
 
 
@@ -98,7 +98,7 @@ class Arena {
        *  Determine the condiiton for finding the new chunk etc.
        * */      
        
-       bool push_back(T element, Chunk* headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
+       bool push_back(T element, Chunk<CHUNK_SZ, T> * headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
        {
 	  // invoke Chunk.push_back() appropriately 
 	  // traverse the chunks to get to the correct chunk
@@ -118,7 +118,23 @@ class Arena {
 	 *
 	 * Note: The updation of pointers when a new chunk is found can be done using atomicCAS().  
 	 * */ 
-	    
+	 
+	 Chunk<CHUNK_SZ, T> * currentChunk = headChunk;
+	 
+	 while(true) // ensure that each chunk does a push_back()
+	 {
+		 bool status = currentChunk->push_back(value);
+		 if(status) break; // push_back() successful. 
+
+		 else 
+		{
+		  Chunk<CHUNK_SZ,T>* newChunk = get_new_chunk();
+                  
+		}
+	 }
+
+
+    
 	}	
        
 };
