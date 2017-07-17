@@ -81,7 +81,11 @@ class Arena {
         * We can follow the link from this chunk to push_back into the 
         * other chunks.
         * */
-       
+	
+
+	
+	
+		       
         /* Get_new_chunk -- 
  	*  Expose a new chunk from the arena to the user program  
  	*  by incrementinga counter
@@ -93,7 +97,29 @@ class Arena {
        *  [determine the chunk to which push_back has to happen]
        *  Determine the condiiton for finding the new chunk etc.
        * */      
+       
+       bool push_back(T element, Chunk* headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
+       {
+	  // invoke Chunk.push_back() appropriately 
+	  // traverse the chunks to get to the correct chunk
+
 	
+	/* Various scenarios */
+	/*
+	 * 1. The head chunk of the vector has space -- soln: simply call push_back(val, head_chunk)
+	 * 2. The head chunk of the vector is full and we want a new chunk for the vector to grow. 
+	 * 	-- soln: go to the next empty chunk.. which can be found by the chunk_count (a variable that keeps track of the next free chunk)  
+	 * 	         set the *next field of current Chunk to the new chunk 
+	 * 3. There are multiple such vectors and we want that the elements of two different vectors do not go into the same chunk. 
+	 * 	-- soln: starting at the head_chunk of the vector, traverse the chunks to get to the correct chunk and perform push back to it.
+	 * 	         Alternatively, keep a permanent copy of the head chunk for each vector. Maintain another variable that stores the 
+	 * 	         address of the chunk to push_back into for each vector. The value of this variable is updated each time the vector 
+	 * 	         spills to a new chunk. This removes the overhead of having to traverse the linked list.
+	 *
+	 * Note: The updation of pointers when a new chunk is found can be done using atomicCAS().  
+	 * */ 
+	    
+	}	
        
 };
 
