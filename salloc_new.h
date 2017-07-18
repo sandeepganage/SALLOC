@@ -67,11 +67,13 @@ class Arena {
    private:
       int capacity;
    public:
+       int chunkCount;
        Chunk<CHUNK_SZ, T> *chunks;
        
 	/*creating arena*/
        Arena(int _capacity) : capacity(_capacity)
        {
+	  chunkCount = 0;
 	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
 	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ, int>) * capacity);
 	}
@@ -91,6 +93,14 @@ class Arena {
  	*  by incrementing a counter
  	* */
 
+        __device__
+	Chunk<CHUNK_SZ,T>* get_new_chunk()
+	{
+	  int id = atomicAdd(&chunkCount,1);
+	  if(id >= capacity)
+		  return NULL;
+	  return &chunks[id];
+	}
 
 
        /* push_back() -- push_back to the correct vector and chunk
@@ -123,13 +133,13 @@ class Arena {
 	 
 	 while(true) // ensure that each chunk does a push_back()
 	 {
-		 bool status = currentChunk->push_back(value);
+		 bool status = currentChunk->push_back(element);
 		 if(status) break; // push_back() successful. 
 
 		 else 
 		{
 		  Chunk<CHUNK_SZ,T>* newChunk = get_new_chunk();
-                  
+                  currentChunk->next = newChunk;
 		}
 	 }
 
