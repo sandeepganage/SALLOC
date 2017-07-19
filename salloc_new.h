@@ -109,6 +109,7 @@ class Arena {
        * */      
        
        bool push_back(T element, Chunk<CHUNK_SZ, T> * headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
+								 // it will be a device variable of type pointer which will be specified by the user
        {
 	  // invoke Chunk.push_back() appropriately 
 	  // traverse the chunks to get to the correct chunk
