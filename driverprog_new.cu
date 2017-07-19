@@ -1,37 +1,62 @@
 #include <stdio.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cstdlib>
 #include "timer.h"
 #include "salloc_new.h"
 
 
-__device__ int *d_v1; // making the offseted address of vector global, 
+__device__ int *d_v1; // making the offsetted address of vector global, 
 		     // makes the corresponding vector global 
+__constant__ int x;
 
 // TODO: alternative is to initialize the variable using cudaMalloc() and pass the
 // offset to the kernel requiring it.
 
 __global__ 
-void kernel1() 
+void kernel1(int *d_arr) 
 {
   size_t tid = threadIdx.x + blockDim.x * blockIdx.x;
   //printf("tid:%d ; addr: %p ; offseted addr: %p\n",tid,d_arr,d_v1);
 //  printf("tid = %d\n",tid); 	
   printf("tid: %d; offseted address seen: %p\n",tid,d_v1);
+  printf("%d\n",d_arr[tid]);
+  printf("%p\n",d_arr);
+ // printf("%d\n",*d_v1);
 }
 
 
 int main(int argc, char** argv)
 {
 
-  int *d_arr;
-  const int ARRAY_SIZE = 32;
+  //GPUArena<32,int> arena;
+  //int *g = arena.create(8);
+
+  //GPUArena<32,int> *arena = GPUArena<32,int>.create(8);
+
+
+  int *d_arr, *h_arr, *d_brr;
+  const int ARRAY_SIZE = 8;
   const int ARRAY_BYTES = ARRAY_SIZE * sizeof(int);
+  cudaMalloc((void**)&d_brr, ARRAY_BYTES );
   cudaMalloc((void**)&d_arr, ARRAY_BYTES );
-  
-  void *addr;
+  h_arr = (int*)malloc(ARRAY_SIZE * sizeof(int));
+
+  for(int i = 0; i < ARRAY_SIZE; i++)
+  {
+    h_arr[i] = 2*i +1;
+  } 
+  cudaMemcpy(d_arr,h_arr,ARRAY_BYTES,cudaMemcpyHostToDevice);
+
+  void *addr  = 0;
+  printf("addr: %p\n",addr);
   int offset = 5;
-  cudaGetSymbolAddress(&addr,d_arr);
+  cudaGetSymbolAddress(&addr,x);
+
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess)
+    printf("Error: %s\n", cudaGetErrorString(err));
+
   printf("addr: %p\n",addr);
   int* offset_addr = (int*)((int*)addr + offset);
  // pointer arithmetic.. type cast of addr to (int*) is important. Adding 5 to addr to skip 5 chunks of (int).
@@ -65,7 +90,7 @@ int main(int argc, char** argv)
    * push_back() into vector v2 and not v1. 
   */
  
-  kernel1<<<1,32>>>();
+  kernel1<<<1,8>>>(d_arr);
   cudaDeviceSynchronize();
   return 0;
 }
