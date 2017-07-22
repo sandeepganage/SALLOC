@@ -108,6 +108,7 @@ class Arena {
        *  Determine the condiiton for finding the new chunk etc.
        * */      
        
+       __device__
        bool push_back(T element, Chunk<CHUNK_SZ, T> * headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
 								 // it will be a device variable of type pointer which will be specified by the user
        {
@@ -139,15 +140,25 @@ class Arena {
 
 		 else 
 		{
+
 		  Chunk<CHUNK_SZ,T>* newChunk = get_new_chunk();
-                  currentChunk->next = newChunk;
+                  //atomicCAS(currentChunk->next,NULL, newChunk); // updating the pointer of the current chunk to point to the new chunk
+		  if(currentChunk->next == NULL)
+		  {
+                  atomicCAS(currentChunk->next,NULL, newChunk); // updating the pointer of the current chunk to point to the new chunk
+		  __threadfence(); // global barrier 
+		  currentChunk = newChunk;
+		  }
+		  
 		}
 	 }
 
-
-    
 	}	
-       
+
+
+      bool reserve(int numChunks) // reserve numChunks chunks for the specified vector
+      {
+      } 
 };
 
 
