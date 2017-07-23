@@ -76,7 +76,6 @@ class Arena {
        int **addrOfChunk;
        int *chunkCount;
        Chunk<CHUNK_SZ, T> *chunks;
-       
 	/*creating arena*/
        Arena(int _capacity) : capacity(_capacity)
        {
@@ -101,6 +100,11 @@ class Arena {
  	*  Expose a new chunk from the arena to the user program  
  	*  by incrementing a counter
  	* */
+
+        int get_capacity()
+	{
+	  return capacity; //  
+	}
 
         __device__
 	Chunk<CHUNK_SZ,T>* get_new_chunk()
@@ -166,9 +170,23 @@ class Arena {
 	}	
 
 
-      bool reserve(int numChunks) // reserve numChunks chunks for the specified vector
+      bool reserve(int numChunks, Chunk<CHUNK_SZ,T> **head_chunk) // reserve numChunks chunks for the specified vector
       {
-         
+        //Chunk<CHUNK_SZ,T> * currentChunk = *head_chunk; 
+	int h_numChunks = numChunks;
+	//int * d_numChunks;
+	//cudaMalloc((void**)&d_numChunks, sizeof(int));
+	int h_chunkCount;
+	cudaMemcpy(&h_chunkCount, chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
+	h_chunkCount += h_numChunks;
+
+        printf("%d\n", capacity);
+        if(get_capacity() < h_chunkCount)
+	  return false;	
+
+	cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyHostToDevice);
+        return true;
+
       } 
 
       

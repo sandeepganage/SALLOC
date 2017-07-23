@@ -25,30 +25,29 @@ void kernel2(Arena<8, int> a)
 
 int main(int argc, char** argv)
 {
-  Arena<8,int> arena(8);
+  Arena<8,int> arena(16);
   
   // create a vector in the arena
   Chunk<8, int> **d_v1; 
   Chunk<8, int> **d_v2; 
   d_v1 = arena.createVector(); // store the address of 
   d_v2 = arena.createVector(); // store the address of 
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess)
-    printf("Error: %s\n", cudaGetErrorString(err));
+  //cudaError_t err = cudaGetLastError();
+  //if (err != cudaSuccess)
+  //  printf("Error: %s\n", cudaGetErrorString(err));
   cudaDeviceSynchronize();
-  					    // the new vector in v1 
 
-
+  arena.reserve(8, d_v2);
   kernel1<<<1,8>>>(arena,d_v1,d_v2);
-  err = cudaGetLastError();
-  if (err != cudaSuccess)
-    printf("Error: %s\n", cudaGetErrorString(err));
+  //cudaError_t err = cudaGetLastError();
+  //if (err != cudaSuccess)
+  //  printf("Error: %s\n", cudaGetErrorString(err));
   cudaDeviceSynchronize();
   printf("kernel1 done.\n");
   kernel2<<<1,8>>>(arena);
-   err = cudaGetLastError();
-  if (err != cudaSuccess)
-    printf("Error: %s\n", cudaGetErrorString(err));
+  // err = cudaGetLastError();
+  //if (err != cudaSuccess)
+  //  printf("Error: %s\n", cudaGetErrorString(err));
 
   cudaDeviceSynchronize();
   printf("kernel2 done.\n");
