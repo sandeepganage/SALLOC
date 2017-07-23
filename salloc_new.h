@@ -71,9 +71,9 @@ class Chunk {
 template<int CHUNK_SZ, typename T>
 class Arena {
    private:
-      int capacity;
+      const int capacity;
    public:
-       int **addrOfChunk;
+       Chunk<CHUNK_SZ,T> **addrOfChunk;
        int *chunkCount;
        Chunk<CHUNK_SZ, T> *chunks;
 	/*creating arena*/
@@ -101,10 +101,6 @@ class Arena {
  	*  by incrementing a counter
  	* */
 
-        int get_capacity()
-	{
-	  return capacity; //  
-	}
 
         __device__
 	Chunk<CHUNK_SZ,T>* get_new_chunk()
@@ -180,8 +176,7 @@ class Arena {
 	cudaMemcpy(&h_chunkCount, chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
 	h_chunkCount += h_numChunks;
 
-        printf("%d\n", capacity);
-        if(get_capacity() < h_chunkCount)
+        if(capacity < h_chunkCount)
 	  return false;	
 
 	cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyHostToDevice);
@@ -202,11 +197,13 @@ class Arena {
 	//h_chunkCount++;
         //
 	//cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyHostToDevice);
-	Chunk<CHUNK_SZ,T> ** d_vec;
+	Chunk<CHUNK_SZ,T> ** d_vec, d_v;
 	cudaMalloc((void**)&d_vec, sizeof(Chunk<CHUNK_SZ, T>*)); // d_vec is a pointer to a vector
+	cudaMalloc((void**)&d_v, sizeof(Chunk<CHUNK_SZ, T>)); // d_vec is a pointer to a vector
 	cudaMemcpy(&h_chunkCount, chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
-	Chunk<CHUNK_SZ,T> ** h_vec ;
-	checkCudaError(cudaMemcpy(h_vec, addrOfChunk, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyDeviceToHost));
+	Chunk<CHUNK_SZ,T> ** h_vec = (Chunk<CHUNK_SZ, T>**)malloc(sizeof(Chunk<CHUNK_SZ, T>*));
+        
+	cudaMemcpy(h_vec, addrOfChunk, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyDeviceToHost);
 
 	h_chunkCount++;
 	cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
@@ -215,7 +212,7 @@ class Arena {
 	//printf("chunkCount = %d\n",h_chunkCount);
 	//printf("h_vec = %p\n",*h_vec);
 	//kernel_set_offset<<<1,1>>>(d_vec); // set the offset for the vector 
-	checkCudaError(cudaMemcpy(d_vec, h_vec, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyHostToDevice));
+	cudaMemcpy(d_vec, h_vec, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyHostToDevice);
 	return d_vec; //*d_vec;
       }
 

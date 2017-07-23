@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   //  printf("Error: %s\n", cudaGetErrorString(err));
   cudaDeviceSynchronize();
 
-  arena.reserve(8, d_v2);
+  arena.reserve(8, d_v1);
   kernel1<<<1,8>>>(arena,d_v1,d_v2);
   //cudaError_t err = cudaGetLastError();
   //if (err != cudaSuccess)
