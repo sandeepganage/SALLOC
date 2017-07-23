@@ -10,6 +10,8 @@
 
 
 
+
+
 template <typename T>
 inline void __checkCudaError__(T code, const char *func, const char *file, int line)
 {
@@ -62,20 +64,27 @@ class Chunk {
    }
 };
 
+//template <int CHUNK_SZ, typename T>
+//__global__
+//void kernel_set_offset(Chunk<CHUNK_SZ,T> **d_vec);
+
 template<int CHUNK_SZ, typename T>
 class Arena {
    private:
       int capacity;
    public:
-       int chunkCount;
+       int **addrOfChunk;
+       int *chunkCount;
        Chunk<CHUNK_SZ, T> *chunks;
        
 	/*creating arena*/
        Arena(int _capacity) : capacity(_capacity)
        {
-	  chunkCount = 0;
-	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,int>) * capacity);
-	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ, int>) * capacity);
+	  cudaMalloc(&addrOfChunk,sizeof(Chunk<CHUNK_SZ,T>*));
+	  cudaMalloc(&chunkCount,sizeof(int));
+	  cudaMemset(chunkCount, 0,sizeof(int));
+	  cudaMalloc(&chunks,sizeof(Chunk<CHUNK_SZ,T>) * capacity);
+	  cudaMemset(chunks, 0,sizeof(Chunk<CHUNK_SZ, T>) * capacity);
 	}
 
        /* Get_head_chunk() -- get the address of the starting chunk for 
@@ -96,9 +105,10 @@ class Arena {
         __device__
 	Chunk<CHUNK_SZ,T>* get_new_chunk()
 	{
-	  int id = atomicAdd(&chunkCount,1);
+	  int id = atomicAdd(chunkCount,1);
 	  if(id >= capacity)
 		  return NULL;
+	  atomicExch(addrOfChunk,&chunks[id]);
 	  return &chunks[id];
 	}
 
@@ -158,10 +168,52 @@ class Arena {
 
       bool reserve(int numChunks) // reserve numChunks chunks for the specified vector
       {
+         
       } 
+
+      
+      Chunk<CHUNK_SZ,T>** createVector()
+      {
+	// create a pointer type variable on the GPU
+	int h_chunkCount;
+	//cudaMemcpy(&h_chunkCount, chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
+	//Chunk<CHUNK_SZ,T> ** d_vec;
+
+	//cudaMalloc((void**)&d_vec, sizeof(Chunk<CHUNK_SZ, T>*)); // d_vec is a pointer to a vector
+
+	//h_chunkCount++;
+        //
+	//cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyHostToDevice);
+	Chunk<CHUNK_SZ,T> ** d_vec;
+	cudaMalloc((void**)&d_vec, sizeof(Chunk<CHUNK_SZ, T>*)); // d_vec is a pointer to a vector
+	cudaMemcpy(&h_chunkCount, chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
+	Chunk<CHUNK_SZ,T> ** h_vec ;
+	checkCudaError(cudaMemcpy(h_vec, addrOfChunk, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyDeviceToHost));
+
+	h_chunkCount++;
+	cudaMemcpy(chunkCount, &h_chunkCount, sizeof(int), cudaMemcpyDeviceToHost);
+
+
+	//printf("chunkCount = %d\n",h_chunkCount);
+	//printf("h_vec = %p\n",*h_vec);
+	//kernel_set_offset<<<1,1>>>(d_vec); // set the offset for the vector 
+	checkCudaError(cudaMemcpy(d_vec, h_vec, sizeof(Chunk<CHUNK_SZ, T>*), cudaMemcpyHostToDevice));
+	return d_vec; //*d_vec;
+      }
+
+	
+     
 };
 
+//template <int CHUNK_SZ, typename T>
+//__global__
+//void kernel_set_offset(Chunk<CHUNK_SZ,T> **d_vec)
+//{
+//  Arena<CHUNK_SZ,T> a;
+//   *d_vec = a.get_new_chunk();
+//}
 
+//************************************************************************//
 
 // implementing with struct
 

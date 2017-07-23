@@ -5,10 +5,13 @@
 
 
 __global__
-void kernel1(Arena<8, int> a)
+void kernel1(Arena<8, int> a, Chunk<8, int> **v1,Chunk<8, int> **v2)
 {
   int tid = threadIdx.x;
   a.chunks[tid].count = tid;   	
+  printf("v1 = %p\n",*v1); // *v1 contains the starting address of v1 in the arena.
+  printf("v2 = %p\n",*v2); // *v2 contains the starting address of v2 in the arena.
+  
  // printf("count for chunk %d = %d\n",tid,a.chunks[tid].count);   	
 }
 
@@ -23,8 +26,21 @@ void kernel2(Arena<8, int> a)
 int main(int argc, char** argv)
 {
   Arena<8,int> arena(8);
-  kernel1<<<1,8>>>(arena);
+  
+  // create a vector in the arena
+  Chunk<8, int> **d_v1; 
+  Chunk<8, int> **d_v2; 
+  d_v1 = arena.createVector(); // store the address of 
+  d_v2 = arena.createVector(); // store the address of 
   cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess)
+    printf("Error: %s\n", cudaGetErrorString(err));
+  cudaDeviceSynchronize();
+  					    // the new vector in v1 
+
+
+  kernel1<<<1,8>>>(arena,d_v1,d_v2);
+  err = cudaGetLastError();
   if (err != cudaSuccess)
     printf("Error: %s\n", cudaGetErrorString(err));
   cudaDeviceSynchronize();
