@@ -57,6 +57,7 @@ class Chunk {
      int id = atomicAdd(&count,1); // atomicAdd returns the oldVal. So id is count before incrementing  
      if(id < CHUNK_SZ) {// space found
        values[id] = value;
+       printf("push_back successful!\n");
        return true; // written successfully in the current chunk    
      }
      
@@ -108,7 +109,8 @@ class Arena {
 	  int id = atomicAdd(chunkCount,1);
 	  if(id >= capacity)
 		  return NULL;
-	  atomicExch(addrOfChunk,&chunks[id]);
+	  *addrOfChunk = &chunks[id];
+	  //atomicExch(addrOfChunk,&chunks[id]);
 	  return &chunks[id];
 	}
 
@@ -118,8 +120,9 @@ class Arena {
        *  Determine the condiiton for finding the new chunk etc.
        * */      
        
+       /*FIXME*/
        __device__
-       bool push_back(T element, Chunk<CHUNK_SZ, T> * headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
+       void push_back(T element, Chunk<CHUNK_SZ, T> * headChunk) // headChunk is the address of the starting chunk for the vector to which push_back has to happen. 
 								 // it will be a device variable of type pointer which will be specified by the user
        {
 	  // invoke Chunk.push_back() appropriately 
@@ -146,16 +149,19 @@ class Arena {
 	 while(true) // ensure that each chunk does a push_back()
 	 {
 		 bool status = currentChunk->push_back(element);
-		 if(status) break; // push_back() successful. 
-
+		 if(status == true)
+                 {  
+		   	break; // push_back() successful. 
+                 }
 		 else 
 		{
 
 		  Chunk<CHUNK_SZ,T>* newChunk = get_new_chunk();
                   //atomicCAS(currentChunk->next,NULL, newChunk); // updating the pointer of the current chunk to point to the new chunk
-		  if(currentChunk->next == NULL)
+		  if(currentChunk->next == nullptr)
 		  {
-                  atomicCAS(currentChunk->next,NULL, newChunk); // updating the pointer of the current chunk to point to the new chunk
+                  //atomicCAS(currentChunk->next,nullptr, newChunk); // updating the pointer of the current chunk to point to the new chunk
+                  currentChunk->next = newChunk;
 		  __threadfence(); // global barrier 
 		  currentChunk = newChunk;
 		  }

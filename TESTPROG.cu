@@ -11,7 +11,7 @@ void kernel1(Arena<8, int> a, Chunk<8, int> **v1,Chunk<8, int> **v2)
   a.chunks[tid].count = tid;   	
   printf("v1 = %p\n",*v1); // *v1 contains the starting address of v1 in the arena.
   printf("v2 = %p\n",*v2); // *v2 contains the starting address of v2 in the arena.
-  
+  a.push_back(5,*v1); 
  // printf("count for chunk %d = %d\n",tid,a.chunks[tid].count);   	
 }
 
@@ -21,11 +21,12 @@ void kernel2(Arena<8, int> a)
 {
   int tid = threadIdx.x;
   printf("count for chunk %d = %d\n",tid,a.chunks[tid].count);   	
+
 }
 
 int main(int argc, char** argv)
 {
-  Arena<8,int> arena(16);
+  Arena<8,int> arena(8);
   
   // create a vector in the arena
   Chunk<8, int> **d_v1; 
@@ -38,6 +39,7 @@ int main(int argc, char** argv)
   cudaDeviceSynchronize();
 
   arena.reserve(8, d_v1);
+
   kernel1<<<1,8>>>(arena,d_v1,d_v2);
   //cudaError_t err = cudaGetLastError();
   //if (err != cudaSuccess)
