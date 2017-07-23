@@ -1,57 +1,39 @@
 #include <stdio.h>
+#include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "salloc_new.h"
-
+#include "timer.h"
 
 __global__
-void kernel1(Arena<8, int> a, Chunk<8, int> **v1,Chunk<8, int> **v2)
+void kernel(Arena<32, int> a, Chunk<32, int> **v1,Chunk<32, int> **v2)
 {
   int tid = threadIdx.x;
   a.chunks[tid].count = tid;   	
-  printf("v1 = %p\n",*v1); // *v1 contains the starting address of v1 in the arena.
-  printf("v2 = %p\n",*v2); // *v2 contains the starting address of v2 in the arena.
-  a.push_back(5,*v1); 
- // printf("count for chunk %d = %d\n",tid,a.chunks[tid].count);   	
+  // *v1 contains the starting address of v1 in the arena.
+  // *v2 contains the starting address of v2 in the arena.
+  a.push_back(tid,*v1); 
+  a.push_back(tid,*v2); 
 }
 
-
-__global__
-void kernel2(Arena<8, int> a)
-{
-  int tid = threadIdx.x;
-  printf("count for chunk %d = %d\n",tid,a.chunks[tid].count);   	
-
-}
 
 int main(int argc, char** argv)
 {
-  Arena<8,int> arena(8);
+
+  Arena<32,int> arena(64); // creating an arena with 64 chunks each of size 32.
   
   // create a vector in the arena
-  Chunk<8, int> **d_v1; 
-  Chunk<8, int> **d_v2; 
-  d_v1 = arena.createVector(); // store the address of 
-  d_v2 = arena.createVector(); // store the address of 
-  //cudaError_t err = cudaGetLastError();
-  //if (err != cudaSuccess)
-  //  printf("Error: %s\n", cudaGetErrorString(err));
+  Chunk<32, int> **d_v1; 
+  Chunk<32, int> **d_v2; 
+  d_v1 = arena.createVector(); // creating a vector and storing its starting address 
+  d_v2 = arena.createVector();  
   cudaDeviceSynchronize();
 
-  arena.reserve(8, d_v1);
-
-  kernel1<<<1,8>>>(arena,d_v1,d_v2);
-  //cudaError_t err = cudaGetLastError();
-  //if (err != cudaSuccess)
-  //  printf("Error: %s\n", cudaGetErrorString(err));
+  bool status = arena.reserve(8, d_v1); // reserve 8 chunks for vector d_v1
+  if (status) printf("Reserve success !\n");
+  kernel<<<8,32>>>(arena,d_v1,d_v2); // kernel launch
   cudaDeviceSynchronize();
-  printf("kernel1 done.\n");
-  kernel2<<<1,8>>>(arena);
-  // err = cudaGetLastError();
-  //if (err != cudaSuccess)
-  //  printf("Error: %s\n", cudaGetErrorString(err));
-
+  printf("kernel1 done. push_back() successful!\n");
   cudaDeviceSynchronize();
-  printf("kernel2 done.\n");
   return 0;
 }
