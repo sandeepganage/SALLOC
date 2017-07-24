@@ -1,6 +1,6 @@
 In the second phase of GSoC 2017, I have extended the functionality of the basic version of an arena allocator I implemented for phase-1.
 
-The arena now supports push_back() and reserve() operations for vectors. In addition, it also allows to allocate and manage multiple vectors on the arena. These vectors are shared across threads, so multiple threads can push elements in to the vectors in parallel.
+The arena now supports push_back() and reserve() operations for vectors. In addition, it also allows for allocating and managing multiple vectors on the arena. These vectors are shared across threads, so multiple threads can push elements in to the vectors in parallel.
 
 A brief outline of the implementation is given below:
 1. An array of Chunks of size 'capacity' is preallocated on the GPU from the CPU using a call to cudaMalloc().
@@ -13,7 +13,7 @@ A brief outline of the implementation is given below:
 
 5. Similarly, 'chunkCount' is used to keep track of whether the capacity of the arena is exhausted or not.
 
-6. If a chunk gets full, but there are other chunks available, then a new chunk is exposed to the user program by incrementing the value of 'chunkCount' atomically and returning the address of the new chunk.
+6. If a chunk gets full, but there are other chunks available, then a new chunk is exposed to the user program, from the arena, by incrementing the value of 'chunkCount' atomically and returning the address of the new chunk.
 
 7. More than one vectors can be allocated and maintained on the arena. Each new vector starts at a new chunk.
 
@@ -23,7 +23,7 @@ A brief outline of the implementation is given below:
 the correct chunk.
 
 10. In cases when a vector spans across multiple chunks, a fully free (new) chunk is requested each time a vector spills to a new chunk. 
-This is done to ensure that a chunk contains the elements of one vector alone. This helps in preventing the data of different vectors from being mixed.
+This is done to ensure that a chunk contains the elements of one vector alone. This helps in preventing the data of different vectors from getting mixed up.
 The different chunks of a vector are stung together in a linked-list.
 
 
