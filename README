@@ -3,14 +3,13 @@ This is the README file for SALLOC
 
 The code is compiled using CUDA 8.0 for NVIDIA Pascal (GeForce GTX 1080) GPU. GCC version used is 5.3.0.
 
-The source for arena allocator SALLOC is present in the file "salloc.h"
-There is a driver code named "driverprog.cu" which can be used to test the push_back() functionality of the allocator.
+The source for arena allocator SALLOC is present in the file "salloc_new.h"
+There is a driver code named "TESTPROG.cu" which can be used to test the support for push_back() and reserve() operations on vector in the allocator.
 
-The file 'driverprog.cu' can be compiled like so:
-	nvcc driverprog.cu -std=c++11 -o driverprog
+The file 'TESTPROG.cu' can be compiled like so:
+	nvcc TESTPROG.cu -std=c++11 -o TESTPROG
 Further, it should be run with the command: 
-	./driverprog	
-The program outputs the time taken to allocate the requested memory.
+	./TESTPROG	
 
 
 Another code named "cuMalloc.cu" is present in the folder. This file contains code for allocating memory using 'malloc()' function, supported by CUDA 8, from inside the GPU kernel.  The performance of SALLOC is compared with malloc() using this code. 
@@ -19,4 +18,5 @@ Another code named "cuMalloc.cu" is present in the folder. This file contains co
  and run with the command: 
 	./cuMalloc
  
-Currently, arena allocator SALLOC only supports the push_back() operation. 
+Currently, arena allocator SALLOC supports the push_back() and reserve() operations on vectors. There is also support for allocating multiple vectors on the arena. 
+These vectors can be shared across threads (ie. visible to all threads).
