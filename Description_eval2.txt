@@ -1,4 +1,3 @@
-
 In the second phase of GSoC 2017, I have extended the functionality of the basic version of an arena allocator I implemented for phase-1.
 
 The arena now supports push_back() and reserve() operations for vectors. In addition, it also allows to allocate and manage multiple vectors on the arena. These vectors are shared across threads, so multiple threads can push elements in to the vectors in parallel.
@@ -16,7 +15,7 @@ A brief outline of the implementation is given below:
 
 6. If a chunk gets full, but there are other chunks available, then a new chunk is exposed to the user program by incrementing the value of 'chunkCount' atomically and returning the address of the new chunk.
 
-7. More than one vectos can be allocated and maintained on the arena. Each new vector starts at a new chunk.
+7. More than one vectors can be allocated and maintained on the arena. Each new vector starts at a new chunk.
 
 8. Outside the arena, on the GPU, the address of the starting chunk of each vector is stored, as meta-data. These offset addresses are visible to all threads. 
 
@@ -36,4 +35,3 @@ The different chunks of a vector are stung together in a linked-list.
 us to set aside the specified number of chunks for a vector.
 
 14. A vector can be traversed by starting at the specified address offset and going over the chunks following the links between chunks.
-
