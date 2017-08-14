@@ -84,7 +84,21 @@ public:
       return &chunks[id]; // returns the address of the new chunk
    }
 
+ // defining createVector() function 
+ /**
+ * The  functionality of the function will be to store the address of the starting chunk of the 
+ * vector (on GPU) to a variable in CPU. This variable will be passed to the kernel(s) that would 
+ * use this vector. 
+ * */
+ // createVector() has to be host function since it is always invoked from the CPU.
+   GPUChunk<CHUNK_SIZE,T> * createVector()
+  {
+    GPUChunk<CHUNK_SIZE,T> ** d_v; // a variable to store the address of chunk on GPU.
     
+    checkCudaError(cudaMalloc(&d_v, sizeof(T *)));
+    
+  }  
+ 
 };
 
 #endif
