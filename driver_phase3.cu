@@ -9,11 +9,18 @@
 
 typedef int T1; // 
 
+__global__ void kernel(GPUArena<32,int> a )
+
+{
+ a.get_new_chunk();
+}
 int main(int argc, char** argv)
 {
   GPUArena<CHUNK_SZ, T1> arena(CAP);
   
 /* This is the desired API for create vector  */
 // GPUChunk<CHUNK_SZ, T1> * v1 = arena.createVector(); // returns the address of the next fully free chunk in arena(on GPU) and stores it on v1 on the CPU
+  kernel<<<1,16>>>(arena); 
+  cudaDeviceSynchronize();
   return 0;
 }

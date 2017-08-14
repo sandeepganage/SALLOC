@@ -65,9 +65,26 @@ public:
       checkCudaError(cudaMemset(chunks, 0, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity));
 
       checkCudaError(cudaMalloc(&nextFreeChunk_d, sizeof(int)));
-//      checkCudaError(cudaMemset(nextFreeChunk_d, 0, sizeof(int)));
+      checkCudaError(cudaMemset(nextFreeChunk_d, 0, sizeof(int)));
 
   }
+
+
+ // expose a new chunk from the arena to the user program
+  __device__ 
+  GPUChunk<CHUNK_SIZE,T> * get_new_chunk()
+  {
+      int id = atomicAdd(nextFreeChunk_d, 1);
+
+      if(id >= capacity) {
+        printf("GPUArena out of capacity\n");
+        assert(false);
+        return NULL;
+      }
+      return &chunks[id]; // returns the address of the new chunk
+   }
+
+    
 };
 
 #endif
