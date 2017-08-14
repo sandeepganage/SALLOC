@@ -20,7 +20,8 @@ int main(int argc, char** argv)
   
 /* This is the desired API for create vector  */
 // GPUChunk<CHUNK_SZ, T1> * v1 = arena.createVector(); // returns the address of the next fully free chunk in arena(on GPU) and stores it on v1 on the CPU
-  kernel<<<1,16>>>(arena); 
+  kernel<<<1,8>>>(arena); 
   cudaDeviceSynchronize();
+  arena.createVector();
   return 0;
 }

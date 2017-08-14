@@ -14,6 +14,7 @@
 #ifndef SALLOC_H
 #define SALLOC_H
 
+#include <stdio.h>
 #include <cuda_runtime.h>
 #include <assert.h>
 
@@ -93,10 +94,32 @@ public:
  // createVector() has to be host function since it is always invoked from the CPU.
    GPUChunk<CHUNK_SIZE,T> * createVector()
   {
+    /** Allocate all memory in CPU using malloc() and the corresponding memory 
+      * in GPU using cudaMalloc() 
+      * Also, do not forget to allocate space for both **v and *v separately
+      * or else we will get segmentation fault. 
+      * **/
     GPUChunk<CHUNK_SIZE,T> ** d_v; // a variable to store the address of chunk on GPU.
+    GPUChunk<CHUNK_SIZE,T> ** v; // a variable to store the address of chunk on CPU.
+    int h_count; // a host variable to store the current value of nextFreeChunk_d
+
+    checkCudaError(cudaMalloc(&d_v, sizeof(T *))); // allocating a pointer to a pointer on GPU. 
     
-    checkCudaError(cudaMalloc(&d_v, sizeof(T *)));
+     /** copying of nextFreeChunk_d to h_count is working fine. **/
+    checkCudaError(cudaMemcpy(&h_count, nextFreeChunk_d, sizeof(int), cudaMemcpyDeviceToHost));
     
+    printf("h_count = %d\n",h_count);
+
+    // address of the chunk (on the GPU) = starting address of arena + nextFreeChunk_d * sizeof(GPUChunk<..>)
+    
+/**
+    GPUChunk<CHUNK_SIZE, T>* addr = chunk + h_count; // adding an offset to starting address of arena (making use of pointer arithmetic) [might be erroronous] 
+    
+   *v = addr;
+    
+**/    
+    
+  return *v; // dummy return 
   }  
  
 };
