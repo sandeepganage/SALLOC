@@ -9,16 +9,18 @@
 
 typedef int T1; // 
 
-__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, GPUChunk<CHUNK_SZ,T1>* v)
-{
-  printf("%p\n",v); 
-}
 
 __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
 
 {
  a.get_new_chunk();
 }
+
+__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, GPUChunk<CHUNK_SZ,T1>* v)
+{
+  printf("%p\n",v); 
+}
+
 int main(int argc, char** argv)
 {
   GPUArena<CHUNK_SZ, T1> arena(CAP);
