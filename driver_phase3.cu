@@ -9,7 +9,7 @@
 
 typedef int T1; // 
 
-__global__ void kernel(GPUArena<32,int> a )
+__global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
 
 {
  a.get_new_chunk();
@@ -22,6 +22,6 @@ int main(int argc, char** argv)
 // GPUChunk<CHUNK_SZ, T1> * v1 = arena.createVector(); // returns the address of the next fully free chunk in arena(on GPU) and stores it on v1 on the CPU
   kernel<<<1,8>>>(arena); 
   cudaDeviceSynchronize();
-  arena.createVector();
+  GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector();
   return 0;
 }
