@@ -9,6 +9,11 @@
 
 typedef int T1; // 
 
+__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, GPUChunk<CHUNK_SZ,T1>* v)
+{
+  printf("%p\n",v); 
+}
+
 __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
 
 {
@@ -23,5 +28,7 @@ int main(int argc, char** argv)
   kernel<<<1,8>>>(arena); 
   cudaDeviceSynchronize();
   GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector();
+  kernel1<<<1,1>>>(arena, v1);
+  cudaDeviceSynchronize();
   return 0;
 }

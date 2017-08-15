@@ -92,6 +92,12 @@ public:
  * use this vector. 
  * */
  // createVector() has to be host function since it is always invoked from the CPU.
+
+
+# if 0
+
+  /* Version 1 */
+  
    GPUChunk<CHUNK_SIZE,T> * createVector()
   {
     /** Allocate all memory in CPU using malloc() and the corresponding memory 
@@ -166,7 +172,89 @@ public:
     
   return offsettedAddr; // address on GPU returned
   }  
- 
+#endif
+
+
+#if 1
+
+  /* Version 2 */
+
+   GPUChunk<CHUNK_SIZE,T> * createVector()
+  {
+    /** Allocate all memory in CPU using malloc() and the corresponding memory 
+      * in GPU using cudaMalloc() 
+      * Also, do not forget to allocate space for both **v and *v separately
+      * or else we will get segmentation fault. 
+      * **/
+  //  GPUChunk<CHUNK_SIZE,T> ** d_v; // a variable on the CPU stack to store the address of address of chunk on GPU.
+  //  GPUChunk<CHUNK_SIZE,T> ** h_v; // a variable, on the stack, to store the address of address of chunk on GPU.
+
+  //  h_v = (GPUChunk<CHUNK_SIZE,T>**)malloc(sizeof(GPUChunk<CHUNK_SIZE,T>*)); // alocating a block on the heap that can hold the address of a chunk. h_v points to this block on the heap.  
+    //after  the above line, h_v[0] is allocated. h_v[0] can hold an address of a chunk
+
+  //  checkCudaError(cudaMalloc(&h_v[0],sizeof(GPUChunk<CHUNK_SIZE,T>))); // allocating a pointer to a chunk on the GPU and storing its address in hv[0] on the CPU. 
+  //  checkCudaError(cudaMalloc(&d_v, sizeof(GPUChunk<CHUNK_SIZE,T> *))); // allocating a pointer to a pointer on GPU. 
+    
+   // now h_v is a pointer to a pointer and d_v is also a pointer to a pointer on the CPU and GPU respectively.
+   // d_v[0] can be allocated the address of a chunk now.
+
+ //   checkCudaError(cudaMemcpy(d_v, h_v, sizeof(GPUChunk<CHUNK_SIZE,T>*), cudaMemcpyHostToDevice)); // copying h_v[0] to d_v[0]
+
+
+    // the only purpose h_v serves is to help allocate a pointer to a pointer on the GPU.
+    // we need to allocate a separate variable to work on the CPU.
+    // Check: does modifying the value of h_v[0] and copying it to d_v[0] work?
+    
+    int h_count; // a host variable to store the current value of nextFreeChunk_d
+
+    
+     /** copying of nextFreeChunk_d to h_count is working fine. **/
+    checkCudaError(cudaMemcpy(&h_count, nextFreeChunk_d, sizeof(int), cudaMemcpyDeviceToHost));
+    
+    printf("h_count = %d\n",h_count);
+
+   /* Do stuff (i.e. compute the address of the chunk )*/
+   
+   // copy the starting address of "chunks" in h_v[0], then compute the address of chunk using the value of h_count. After having computed the value, copy h_v to d_v 
+
+   
+   // The starting address of the array "chunks" (the arena) on the GPU is already available on the CPU, in the variable chunks. We can use it as it is.
+   
+   GPUChunk<CHUNK_SIZE,T> * offsettedAddr = chunks; // offsettedAddr has the starting address of the arena.
+   
+   // computing the address of the chunk in the arena (by adding offset*sizeof(GPUCHUNK<..>) to "chunks")
+   offsettedAddr += h_count * sizeof(GPUChunk<CHUNK_SIZE, T>); // number of bytes, thus the offset
+   
+   // copy the offsettedAddr to d_v[0]
+ // checkCudaError(cudaMemcpy(d_v, &offsettedAddr, sizeof(GPUChunk<CHUNK_SIZE, T>*), cudaMemcpyHostToDevice)); 
+  
+
+
+
+   /* Copy the d_v to h_v  (if required) like so */
+   /**
+    checkCudaError(cudaMemcpy(h_v, d_v, sizeof(GPUChunk<CHUNK_SIZE,T>*), cudaMemcpyDeviceToHost));
+   **/
+
+
+
+
+
+    // address of the chunk (on the GPU) = starting address of arena + nextFreeChunk_d * sizeof(GPUChunk<..>)
+    
+/**
+    GPUChunk<CHUNK_SIZE, T>* addr = chunk + h_count; // adding an offset to starting address of arena (making use of pointer arithmetic) [might be erroronous] 
+    
+   *v = addr;
+    
+**/    
+    
+  return offsettedAddr; // address on GPU returned
+  }  
+
+
+#endif 
+
 };
 
 #endif
