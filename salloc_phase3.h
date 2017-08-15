@@ -85,6 +85,9 @@ public:
       return &chunks[id]; // returns the address of the new chunk
    }
 
+ 
+
+
  // defining createVector() function 
  /**
  * The  functionality of the function will be to store the address of the starting chunk of the 
@@ -249,7 +252,14 @@ public:
     
 **/    
     
+  ++h_count; // incrementing the value of nextFreeChunk so that it now points to a new chunk.
+  // in effect, the current chunk is reserved for a vector.
+  checkCudaError(cudaMemcpy(nextFreeChunk_d, &h_count, sizeof(int), cudaMemcpyHostToDevice));
   return offsettedAddr; // address on GPU returned
+  
+  // TODO:
+  // here I am returning the starting address of the chunk. I should rather return the address of the the array inside so that the user is able to write things like 
+  // v[0], v[1] etc.
   }  
 
 

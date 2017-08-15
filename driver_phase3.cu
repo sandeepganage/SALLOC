@@ -19,6 +19,8 @@ __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
 __global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, GPUChunk<CHUNK_SZ,T1>* v)
 {
   printf("%p\n",v); 
+  //v->values[0] = 5; 
+  //printf("%d\n",*(v + sizeof(T1))); 
 }
 
 int main(int argc, char** argv)
