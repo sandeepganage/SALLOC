@@ -99,16 +99,38 @@ public:
       * Also, do not forget to allocate space for both **v and *v separately
       * or else we will get segmentation fault. 
       * **/
-    GPUChunk<CHUNK_SIZE,T> ** d_v; // a variable to store the address of chunk on GPU.
-    GPUChunk<CHUNK_SIZE,T> ** v; // a variable to store the address of chunk on CPU.
+    GPUChunk<CHUNK_SIZE,T> ** d_v; // a variable on the CPU stack to store the address of address of chunk on GPU.
+    GPUChunk<CHUNK_SIZE,T> ** h_v; // a variable, on the stack, to store the address of address of chunk on CPU.
+    h_v = (GPUChunk<CHUNK_SIZE,T>**)malloc(sizeof(GPUChunk<CHUNK_SIZE,T>*)); // alocating a block on the heap that can hold the address of a chunk. h_v points to this block on the heap.  
+    checkCudaError(cudaMalloc(&h_v[0],sizeof(GPUChunk<CHUNK_SIZE,T>))); // allocating a pointer to a chunk on the GPU and storing its address in hv[0] on the CPU. 
+    checkCudaError(cudaMalloc(&d_v, sizeof(GPUChunk<CHUNK_SIZE,T> *))); // allocating a pointer to a pointer on GPU. 
+    
+   // now h_v is a pointer to a pointer and d_v is also a pointer to a pointer on the CPU and GPU respectively.
+   // d_v[0] can be allocated the address of a chunk now.
+
     int h_count; // a host variable to store the current value of nextFreeChunk_d
 
-    checkCudaError(cudaMalloc(&d_v, sizeof(T *))); // allocating a pointer to a pointer on GPU. 
     
      /** copying of nextFreeChunk_d to h_count is working fine. **/
     checkCudaError(cudaMemcpy(&h_count, nextFreeChunk_d, sizeof(int), cudaMemcpyDeviceToHost));
     
     printf("h_count = %d\n",h_count);
+
+   /* Do stuff (i.e. compute the address of the chunk )*/
+   
+   // copy the starting address of "chunks" in h_v[0], then compute the address of chunk using the value of h_count. After having computed the value, copy h_v to d_v 
+
+    checkCudaError(cudaMemcpy(d_v, h_v, sizeof(GPUChunk<CHUNK_SIZE,T>*), cudaMemcpyHostToDevice));
+
+
+   /* Copy the d_v to h_v  (if required) like so */
+   /**
+    checkCudaError(cudaMemcpy(h_v, d_v, sizeof(GPUChunk<CHUNK_SIZE,T>*), cudaMemcpyDeviceToHost));
+   **/
+
+
+
+
 
     // address of the chunk (on the GPU) = starting address of arena + nextFreeChunk_d * sizeof(GPUChunk<..>)
     
@@ -119,7 +141,7 @@ public:
     
 **/    
     
-  return *v; // dummy return 
+  return *h_v; // dummy return 
   }  
  
 };
