@@ -182,7 +182,8 @@ public:
 
   /* Version 2 */
 
-   GPUChunk<CHUNK_SIZE,T> * createVector()
+   T * createVector(int sz = CHUNK_SIZE) // optional size parameter that defaults to CHUNK_SIZE.
+   //GPUChunk<CHUNK_SIZE,T> * createVector()
   {
     /** Allocate all memory in CPU using malloc() and the corresponding memory 
       * in GPU using cudaMalloc() 
@@ -255,11 +256,17 @@ public:
   ++h_count; // incrementing the value of nextFreeChunk so that it now points to a new chunk.
   // in effect, the current chunk is reserved for a vector.
   checkCudaError(cudaMemcpy(nextFreeChunk_d, &h_count, sizeof(int), cudaMemcpyHostToDevice));
-  return offsettedAddr; // address on GPU returned
+  return (T*) offsettedAddr; // address on GPU returned
+ // it is cast to (T*) so that it can be stepped in multiples of sizeof(T)
   
-  // TODO:
+  // TODO: done
   // here I am returning the starting address of the chunk. I should rather return the address of the the array inside so that the user is able to write things like 
   // v[0], v[1] etc.
+
+  //TODO:
+  //overload the '[]' operator to check for max_allowed size (specified size or filled up size). Throw an error if one is trying to access out of bound accesses.
+
+
   }  
 
 
