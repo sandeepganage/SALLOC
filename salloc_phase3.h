@@ -47,6 +47,20 @@ class GPUChunk {
     GPUChunk<CHUNK_SIZE, T> *next; // pointer to the next chunk
     // required for pop_back()
     GPUChunk<CHUNK_SIZE, T> *prev; // pointer to the previous chunk
+
+
+    __device__
+    bool push_back(T value) {
+      int id = atomicAdd(&nextFreeValue, 1);
+      if(id < CHUNK_SIZE) {
+        printf("push_back succeeded!\n");
+        values[id] = value;
+        return true;
+      } else {
+        return false;
+      }
+    }
+
 };
 
 
@@ -296,7 +310,13 @@ public:
  // invoke an iterator to go over the arena starting from the specified chunk and follow the links to access all elements of a vector. In the process compute the cunks
 }
 
- __device__ push_back(T* vec, T ele)
+ __device__ void push_back(T* vec, T ele)
+ {
+   while(true) 
+  {
+    //bool status = 
+  }
+ }
 
 #endif 
 
