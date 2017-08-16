@@ -42,6 +42,8 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v)
   //v->values[1] = 2; 
   printf("%d\n",v[1]); 
 //  printf("%p\n",(v + sizeof(int))); 
+  printf("**********");
+  a.getIndex(v, 1);
 }
 int main(int argc, char** argv)
 {

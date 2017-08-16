@@ -5,7 +5,10 @@
  * 3. implement the API: arena.createVector([size]) -- initial size of the vector is an optional parameter.
  *    Support for multiple vectors on the arena.
  * 4. implement getIndex(): maps the index of a vector to the corrensponding index on the arena. 
+ * 5. Implement an iterator.
  * */
+
+
 
 /**
  * GOAL-1: implement support for multiple vectors on the arena
@@ -252,7 +255,7 @@ public:
    *v = addr;
     
 **/    
-    
+ // h_count should be incremented by ceil(sz/CHUNK_SIZE). Also, a link between these should be created.   
   ++h_count; // incrementing the value of nextFreeChunk so that it now points to a new chunk.
   // in effect, the current chunk is reserved for a vector.
   checkCudaError(cudaMemcpy(nextFreeChunk_d, &h_count, sizeof(int), cudaMemcpyHostToDevice));
@@ -263,12 +266,37 @@ public:
   // here I am returning the starting address of the chunk. I should rather return the address of the the array inside so that the user is able to write things like 
   // v[0], v[1] etc.
 
-  //TODO:
+  // Note: no need to do operator overloading. 
+  // A hack to tackle reserve/initial size of vector
+  // Since we know all chunks after the one being pointed to by   
+  // nextFreeChunk_d are free, we need to increment the value of nextFreeChunk by
+  // ceil(requested size / chunk_size ).
+  // create a link between the chunks, if the vector spans multiple contiguous 
+  // chubks too. 
+  
+  //TODO: Not Required
   //overload the '[]' operator to check for max_allowed size (specified size or filled up size). Throw an error if one is trying to access out of bound accesses.
 
 
   }  
 
+ // getIndex will map the vector "index" to arena index.
+ // usage:
+ // int i = getIndex(v,index);
+ // v[i]++;
+  __device__ int 
+  getIndex(T* v, int index) // here index is the vector index
+{
+  GPUChunk<CHUNK_SIZE,T> * v1 = (GPUChunk<CHUNK_SIZE,T> *) v;
+ // printf("\nprint from getIndex\n ");
+ // printf("%d\n",v[index]);
+ // printf("%d\n", v1->values[index]);
+
+
+ // invoke an iterator to go over the arena starting from the specified chunk and follow the links to access all elements of a vector. In the process compute the cunks
+}
+
+ __device__ push_back(T* vec, T ele)
 
 #endif 
 
