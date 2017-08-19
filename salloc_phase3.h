@@ -312,9 +312,37 @@ public:
 
  __device__ void push_back(T* vec, T ele)
  {
+   GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   
+   int xyz = 0;
+
    while(true) 
   {
-    //bool status = 
+    bool status = currentChunk->push_back(ele); 
+    if(status == true) // push_back succeded
+	break;
+    
+    else // chunk is full 
+  {
+   /* case-1: the filled chunk does not have a link to a new chunk*/
+   // one thread establishes a link to a new chunk, while rest of the threads follow the link.
+   
+   /* case-2: the filled chunk has a link to another chunk */
+  // The threads only follow the link to the new chunk.
+   if(currentChunk->next == NULL) // case-1
+   {
+     if(atomicCAS(&xyz,0,1)==0)
+     {
+       GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
+       n->next = newChunk;
+       xyz = 0;
+     }
+     
+   }
+
+
+  }
+
   }
  }
 
