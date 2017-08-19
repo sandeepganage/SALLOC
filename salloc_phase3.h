@@ -74,6 +74,8 @@ private:
    
 public: 
     int *nextFreeChunk_d; // points to the free chunk
+    int *xyz_d; //semaphore variable for arena. Can take values 0/1.    
+
     GPUArena(int _capacity)
       : capacity(_capacity)
     {
@@ -85,6 +87,8 @@ public:
       checkCudaError(cudaMalloc(&nextFreeChunk_d, sizeof(int)));
       checkCudaError(cudaMemset(nextFreeChunk_d, 0, sizeof(int)));
 
+      checkCudaError(cudaMalloc(&xyz_d, sizeof(int)));
+      checkCudaError(cudaMemset(xyz_d, 0, sizeof(int)));
   }
 
 
@@ -331,12 +335,19 @@ public:
   // The threads only follow the link to the new chunk.
    if(currentChunk->next == NULL) // case-1
    {
-     if(atomicCAS(&xyz,0,1)==0)
+     if(atomicCAS(xyz_d,0,1)==0) // atomicCAS will be executed by all threads entering the then block.
+    // if multiple threads try to perform the CAS simultaneously, only one of them will succeed. The rest will go ahead and
+    // execute the else branch.
      {
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
        currentChunk->next = newChunk;
-       xyz = 0;
+       *xyz_d = 0;
      }
+     while(*xyz_d == 1); // barrier for all threads.
+    // invariant : next chunk should be available and link should be established to the next chunk before other threads try to 
+    // push_back in the new chunk.
+   
+   /* To allow multiple vectors to push_back in parallel, each vector should be local to a vector and not common to the entire arena.*/
      
    }
 
