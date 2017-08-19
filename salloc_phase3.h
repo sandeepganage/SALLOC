@@ -330,7 +330,6 @@ public:
  {
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
    
-   int xyz = 0;
 
    while(true) 
   {
@@ -341,31 +340,42 @@ public:
     else // chunk is full 
   {
    /* case-1: the filled chunk does not have a link to a new chunk*/
+
    // one thread establishes a link to a new chunk, while rest of the threads follow the link.
    
    /* case-2: the filled chunk has a link to another chunk */
   // The threads only follow the link to the new chunk.
+
    if(currentChunk->next == NULL) // case-1
    {
+     printf("want new chunk\n");
      if(atomicCAS(xyz_d,0,1)==0) // atomicCAS will be executed by all threads entering the then block.
     // if multiple threads try to perform the CAS simultaneously, only one of them will succeed. The rest will go ahead and
     // execute the else branch.
      {
+       printf("CAS succeeded\n");
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
+       printf("got new chunk\n");
        currentChunk->next = newChunk;
        newChunk->prev = currentChunk; // creating a doublely linked list to support pop_back();
        *xyz_d = 0;
+       //currentChunk = newChunk; // updating the currentChunk to newChunk;
      }
+     printf("before the while loop\n");
      while(*xyz_d == 1); // barrier for all threads.
     // invariant : next chunk should be available and link should be established to the next chunk before other threads try to 
     // push_back in the new chunk.
    
    /* To allow multiple vectors to push_back in parallel, each vector should be local to a vector and not common to the entire arena.*/
-     
+  
+    printf("after the while loop\n");   
+  
    }
    
-   else if(currentChunk->next != NULL) // the current chunk is a part of an existing vector spanning multiple chunks.
+   else if(currentChunk->next != NULL) //  case-2: the current chunk is a part of an existing vector spanning multiple chunks.
   {
+   //FIXME: complete the todo .. [current_chunk is currently not being set correctly]
+   printf("go to new chunk\n");
    // TODO:
    // iterate over the chunks of the vector and get to the chunk which is either not full or to the chunk for which current->next is NULL.
    // thereafter call the push_back() method in GPUChunk to push back the elements.
