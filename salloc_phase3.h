@@ -61,6 +61,18 @@ class GPUChunk {
       }
     }
 
+    __device__ bool pop_back() {
+      int id = atomicAdd(&nextFreeValue,-1);
+      if(id > 0) {
+        printf("pop_back succeeded!\n");
+        return true;
+      } else {
+        return false;
+	
+    }
+       
+    }
+
 };
 
 
@@ -89,7 +101,7 @@ public:
 
       checkCudaError(cudaMalloc(&xyz_d, sizeof(int)));
       checkCudaError(cudaMemset(xyz_d, 0, sizeof(int)));
-  }
+    }
 
 
  // expose a new chunk from the arena to the user program
@@ -341,6 +353,7 @@ public:
      {
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
        currentChunk->next = newChunk;
+       newChunk->prev = currentChunk; // creating a doublely linked list to support pop_back();
        *xyz_d = 0;
      }
      while(*xyz_d == 1); // barrier for all threads.
@@ -350,12 +363,40 @@ public:
    /* To allow multiple vectors to push_back in parallel, each vector should be local to a vector and not common to the entire arena.*/
      
    }
-
-
+   
+   else if(currentChunk->next != NULL) // the current chunk is a part of an existing vector spanning multiple chunks.
+  {
+   // TODO:
+   // iterate over the chunks of the vector and get to the chunk which is either not full or to the chunk for which current->next is NULL.
+   // thereafter call the push_back() method in GPUChunk to push back the elements.
+  }
+   
   }
 
   }
  }
+
+
+ __device__ void pop_back(T* vec)
+{
+   GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   /* TODO: traverse the arena to get to the last chunk of the current vector
+ * which has atleast one element */
+  while(true)
+ {
+  bool status = currentChunk->pop_back();
+  if (status == true)  break;
+  
+ else  // the current chunk has no element
+  {
+      // set the *prev of the current chunk and *next of the parent chunk to NULL 
+      // and set the current chunk to the previous chunk.
+      // regarding the counter nextFreeChunk_d, reduce it only if the current  value is equal to the current chunk(i.e. the chunk being popped from happens to be the last exposed chunk in the arena). Otherwise not.
+        
+  }  
+
+ }
+}
 
 #endif 
 
