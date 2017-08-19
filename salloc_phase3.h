@@ -334,7 +334,7 @@ public:
      if(atomicCAS(&xyz,0,1)==0)
      {
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
-       n->next = newChunk;
+       currentChunk->next = newChunk;
        xyz = 0;
      }
      
