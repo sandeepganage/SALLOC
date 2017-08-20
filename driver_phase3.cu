@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   //cudaDeviceSynchronize();
   T1 * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
-  kernel1<<<1,18>>>(arena, v1);
+  kernel1<<<1,255>>>(arena, v1);
   //T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel2<<<1,3>>>(arena, v1);
   cudaDeviceSynchronize();

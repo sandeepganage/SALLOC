@@ -350,36 +350,37 @@ public:
 
    if(currentChunk->next == NULL) // case-1
    {
-     printf("want new chunk\n");
+     //printf("want new chunk\n");
      if(atomicCAS(xyz_d,0,1)==0) // atomicCAS will be executed by all threads entering the then block.
     // if multiple threads try to perform the CAS simultaneously, only one of them will succeed. The rest will go ahead and
     // execute the else branch.
      {
-       printf("CAS succeeded\n");
+       //printf("CAS succeeded\n");
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
-       printf("got new chunk\n");
+       //printf("got new chunk\n");
        currentChunk->next = newChunk;
        newChunk->prev = currentChunk; // creating a doublely linked list to support pop_back();
        *xyz_d = 0;
        //currentChunk = newChunk; // updating the currentChunk to newChunk;
      }
-     printf("before the while loop\n");
+    // printf("before the while loop\n");
      while(*xyz_d == 1); // barrier for all threads.
     // invariant : next chunk should be available and link should be established to the next chunk before other threads try to 
     // push_back in the new chunk.
    
    /* To allow multiple vectors to push_back in parallel, each vector should be local to a vector and not common to the entire arena.*/
   
-    printf("after the while loop\n");   
+   // printf("after the while loop\n");   
   
    }
    
    else if(currentChunk->next != NULL) //  case-2: the current chunk is a part of an existing vector spanning multiple chunks.
   {
     currentChunk = currentChunk->next;
-   //FIXME: complete the todo .. [current_chunk is currently not being set correctly]
+   //FIXED: complete the todo .. [current_chunk is currently not being set correctly]
    //printf("go to new chunk\n");
-   // TODO:
+
+   // TODO: may not be required
    // iterate over the chunks of the vector and get to the chunk which is either not full or to the chunk for which current->next is NULL.
    // thereafter call the push_back() method in GPUChunk to push back the elements.
   }
@@ -395,6 +396,11 @@ public:
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
    /* TODO: traverse the arena to get to the last chunk of the current vector
  * which has atleast one element */
+  while(currentChunk->next != NULL) // getting to the last chunk of the vec
+  {
+   currentChunk = currentChunk->next;
+  }
+
   while(true)
  {
   bool status = currentChunk->pop_back();
@@ -402,6 +408,8 @@ public:
   
  else  // the current chunk has no element
   {
+      
+       
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
       // and set the current chunk to the previous chunk.
       // regarding the counter nextFreeChunk_d, reduce it only if the current  value is equal to the current chunk(i.e. the chunk being popped from happens to be the last exposed chunk in the arena). Otherwise not.
