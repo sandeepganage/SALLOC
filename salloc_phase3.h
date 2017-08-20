@@ -61,13 +61,15 @@ class GPUChunk {
       }
     }
 
-    __device__ bool pop_back() {
+    __device__ void pop_back() {
       int id = atomicAdd(&nextFreeValue,-1);
       if(id > 0) {
         printf("pop_back succeeded!\n");
-        return true;
+        return values[id];
+        //return true;
       } else {
-        return false;
+        //return false;
+        return;
 	
     }
        
@@ -374,8 +376,9 @@ public:
    
    else if(currentChunk->next != NULL) //  case-2: the current chunk is a part of an existing vector spanning multiple chunks.
   {
+    currentChunk = currentChunk->next;
    //FIXME: complete the todo .. [current_chunk is currently not being set correctly]
-   printf("go to new chunk\n");
+   //printf("go to new chunk\n");
    // TODO:
    // iterate over the chunks of the vector and get to the chunk which is either not full or to the chunk for which current->next is NULL.
    // thereafter call the push_back() method in GPUChunk to push back the elements.

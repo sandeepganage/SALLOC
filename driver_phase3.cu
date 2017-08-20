@@ -4,7 +4,7 @@
 #include <cuda.h>
 #include "salloc_phase3.h"
 
-#define CHUNK_SZ 32 // size of a chunk
+#define CHUNK_SZ 16 // size of a chunk
 #define CAP 16 // number of chunks in the chunk
 
 typedef int T1; // 
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   //cudaDeviceSynchronize();
   T1 * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
-  kernel1<<<1,34>>>(arena, v1);
+  kernel1<<<1,18>>>(arena, v1);
   //T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel2<<<1,3>>>(arena, v1);
   cudaDeviceSynchronize();
