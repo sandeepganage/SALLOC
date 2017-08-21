@@ -63,6 +63,7 @@ class GPUChunk {
 
     __device__ bool pop_back() {
       int id = atomicAdd(&nextFreeValue,-1);
+      printf("id = %d\n",nextFreeValue);
       if(id > 0) {
         printf("pop_back succeeded!\n");
         //return values[id];
@@ -129,6 +130,7 @@ public:
   __device__
    void reclaim_chunk()
   {
+      printf("hello from reclaim_chunk()\n");
       int id = atomicAdd(nextFreeChunk_d,-1);
 
       if(id <= 0) {
@@ -411,6 +413,7 @@ public:
 
  __device__ void pop_back(T* vec)
 {
+// FIXME: currently pop_back pops as many elements as requested even if the value is not there an then gets stuck 
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
    /* TODO: traverse the arena to get to the last chunk of the current vector
  * which has atleast one element */
@@ -438,14 +441,15 @@ public:
       //currentChunk->next = NULL; // already null. that is why we stopped at this node. Otherwise we would have marched ahead in the linked list.
       parent->next = NULL; // isolating currentChunk;
       //currentChunk = parent;	
+      // *uvw_d = 0; // to test
 
-      if(currentChunk == &chunks[*nextFreeChunk_d]) // the current chunk is the last exposed chunk from the arena, so we can reclaim it.
+      if(currentChunk == &chunks[*nextFreeChunk_d - 1]) // the current chunk is the last exposed chunk from the arena, so we can reclaim it.
 	reclaim_chunk();// call the routine "reclaim_chunk()"
        *uvw_d = 0;
      }
      while(*uvw_d == 1); // barrier for all threads.
     } 
-    //  FIXED: currentChunk not updated properly. 
+    //  FIXME: currentChunk not updated properly. 
        
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
       // and set the current chunk to the previous chunk.
@@ -460,14 +464,15 @@ public:
    {
      currentChunk = currentChunk->next;
    }
-
+ //  if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
+ //  	break;
    }
 
-  if(currentChunk ==  (GPUChunk<CHUNK_SIZE,T>*) vec) // current chunk is the head chunk of the vector and is empty
-   {
-    printf("hello\n");
-    break;
-   }
+//  if((currentChunk->prev == NULL) && (currentChunk->next == NULL) && (currentChunk ==  (GPUChunk<CHUNK_SIZE,T>*) vec)) // current chunk is the head chunk of the vector and is empty
+//   {
+//    printf("hello\n");
+//    break;
+//   }
   }  
 
  }

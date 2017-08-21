@@ -46,7 +46,7 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v)
   //v->values[1] = 2; 
 //  printf("%d\n",v[1]); 
 //  printf("%p\n",(v + sizeof(int))); 
-  printf("**********\n");
+  //printf("**********\n");
 //  a.getIndex(v, 1);
 }
 int main(int argc, char** argv)
@@ -59,9 +59,9 @@ int main(int argc, char** argv)
   //cudaDeviceSynchronize();
   T1 * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
-  kernel1<<<1,8>>>(arena, v1);
+  kernel1<<<1,24>>>(arena, v1);
   //T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
-  kernel2<<<1,21>>>(arena, v1);
+  kernel2<<<1,30>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }
