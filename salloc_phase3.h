@@ -443,9 +443,9 @@ public:
 	reclaim_chunk();// call the routine "reclaim_chunk()"
        *uvw_d = 0;
      }
-     while(*xyz_d == 1); // barrier for all threads.
+     while(*uvw_d == 1); // barrier for all threads.
     } 
-    //  FIXME:currentChunk not updated properly. 
+    //  FIXED: currentChunk not updated properly. 
        
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
       // and set the current chunk to the previous chunk.
@@ -455,12 +455,18 @@ public:
    {
     // set the current chunk correctly
     // look for a valid chunk of the vector again
-    currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; // starting over again
+    currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; // starting over again since we are in the middle of nowhere.
    while(currentChunk->next != NULL) // getting to the last chunk of the vec
    {
      currentChunk = currentChunk->next;
    }
 
+   }
+
+  if(currentChunk ==  (GPUChunk<CHUNK_SIZE,T>*) vec) // current chunk is the head chunk of the vector and is empty
+   {
+    printf("hello\n");
+    break;
    }
   }  
 
