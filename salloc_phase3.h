@@ -61,15 +61,15 @@ class GPUChunk {
       }
     }
 
-    __device__ void pop_back() {
+    __device__ bool pop_back() {
       int id = atomicAdd(&nextFreeValue,-1);
       if(id > 0) {
         printf("pop_back succeeded!\n");
-        return values[id];
-        //return true;
+        //return values[id];
+        return true;
       } else {
-        //return false;
-        return;
+        return false;
+       // return;
 	
     }
        
@@ -89,6 +89,7 @@ private:
 public: 
     int *nextFreeChunk_d; // points to the free chunk
     int *xyz_d; //semaphore variable for arena. Can take values 0/1.    
+    int *uvw_d; //semaphore variable for arena. Can take values 0/1.    
 
     GPUArena(int _capacity)
       : capacity(_capacity)
@@ -103,6 +104,9 @@ public:
 
       checkCudaError(cudaMalloc(&xyz_d, sizeof(int)));
       checkCudaError(cudaMemset(xyz_d, 0, sizeof(int)));
+
+      checkCudaError(cudaMalloc(&uvw_d, sizeof(int)));
+      checkCudaError(cudaMemset(uvw_d, 0, sizeof(int)));
     }
 
 
@@ -120,6 +124,20 @@ public:
       return &chunks[id]; // returns the address of the new chunk
    }
 
+ // __device__ 
+ // GPUChunk<CHUNK_SIZE,T> * reclaim_chunk()
+  __device__
+   void reclaim_chunk()
+  {
+      int id = atomicAdd(nextFreeChunk_d,-1);
+
+      if(id <= 0) {
+        printf("GPUArena empty\n");
+        assert(false);
+       // return NULL;
+      }
+      //return &chunks[id]; // returns the address of the new chunk
+   }
  
 
 
@@ -408,7 +426,27 @@ public:
   
  else  // the current chunk has no element
   {
-      
+     // The thread that pops the last element in the chunk should change the things.
+     if(currentChunk->prev != NULL)
+    {
+     if(atomicCAS(uvw_d,0,1)==0)  // only one thread goes inside
+     {
+      printf("want new chunk\n");
+      // set the *prev of the current chunk and *next of the parent chunk to NULL 
+      GPUChunk<CHUNK_SIZE,T> * parent = currentChunk->prev;
+      currentChunk->prev = NULL; // isolating that node since a chunk can only be a part of one vector.
+      //currentChunk->next = NULL; // already null. that is why we stopped at this node. Otherwise we would have marched ahead in the linked list.
+      parent->next = NULL; // isolating currentChunk;
+      //currentChunk = parent;	
+
+      if(currentChunk == &chunks[*nextFreeChunk_d]) // the current chunk is the last exposed chunk from the arena, so we can reclaim it.
+	reclaim_chunk();// call the routine "reclaim_chunk()"
+       *uvw_d = 0;
+     }
+     while(*xyz_d == 1); // barrier for all threads.
+    } 
+    //  FIXME:currentChunk not updated properly. 
+     printf("hello\n");   
        
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
       // and set the current chunk to the previous chunk.
