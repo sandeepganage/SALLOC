@@ -446,12 +446,22 @@ public:
      while(*xyz_d == 1); // barrier for all threads.
     } 
     //  FIXME:currentChunk not updated properly. 
-     printf("hello\n");   
        
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
       // and set the current chunk to the previous chunk.
       // regarding the counter nextFreeChunk_d, reduce it only if the current  value is equal to the current chunk(i.e. the chunk being popped from happens to be the last exposed chunk in the arena). Otherwise not.
-        
+         
+   else if(currentChunk->prev == NULL) //  the thread is pointing to a node that is not a part of any vector
+   {
+    // set the current chunk correctly
+    // look for a valid chunk of the vector again
+    currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; // starting over again
+   while(currentChunk->next != NULL) // getting to the last chunk of the vec
+   {
+     currentChunk = currentChunk->next;
+   }
+
+   }
   }  
 
  }
