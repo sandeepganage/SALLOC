@@ -16,7 +16,7 @@ __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
  a.get_new_chunk();
 }
 
-__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v)
+__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 {
   unsigned tid = threadIdx.x;
   //printf("%p\n",v); 
@@ -25,13 +25,15 @@ __global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  a.push_back(v,tid);
+ a.push_back(v1,tid); printf("push_back in v1\n");
+ a.push_back(v2,tid); printf("push_back in v2\n");
+ 
   //v->values[1] = 2; 
 //  printf("v[%d] = %d\n", tid,v[tid]); 
 //  printf("%p\n",(v + sizeof(int))); 
 }
 
-__global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v)
+__global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 {
   unsigned tid = threadIdx.x;
 //  printf("%p\n",v); 
@@ -40,7 +42,8 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  a.pop_back(v);
+  a.pop_back(v1); printf("pop_back from v1\n");
+  a.pop_back(v2); printf("pop_back from v2\n");
 //  printf("v[%d] = %d\n", tid,v[tid]); 
 //  v[1]= 2; 
   //v->values[1] = 2; 
@@ -59,9 +62,9 @@ int main(int argc, char** argv)
   //cudaDeviceSynchronize();
   T1 * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
-  kernel1<<<1,23>>>(arena, v1);
-  //T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
-  kernel2<<<1,25>>>(arena, v1);
+  T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
+  kernel1<<<1,23>>>(arena, v1,v2);
+  kernel2<<<1,25>>>(arena, v1,v2);
   cudaDeviceSynchronize();
   return 0;
 }
