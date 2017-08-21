@@ -47,13 +47,15 @@ class GPUChunk {
     GPUChunk<CHUNK_SIZE, T> *next; // pointer to the next chunk
     // required for pop_back()
     GPUChunk<CHUNK_SIZE, T> *prev; // pointer to the previous chunk
-
+    
+    
 
     __device__
     bool push_back(T value) {
       int id = atomicAdd(&nextFreeValue, 1);
       if(id < CHUNK_SIZE) {
         printf("push_back succeeded!\n");
+        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
         values[id] = value;
         return true;
       } else {
@@ -63,9 +65,10 @@ class GPUChunk {
 
     __device__ bool pop_back() {
       int id = atomicAdd(&nextFreeValue,-1);
-      printf("id = %d\n",nextFreeValue);
+//      printf("id = %d\n",nextFreeValue);
       if(id > 0) {
         printf("pop_back succeeded!\n");
+        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
         //return values[id];
         return true;
       } else {
@@ -357,7 +360,9 @@ public:
   {
     bool status = currentChunk->push_back(ele); 
     if(status == true) // push_back succeded
-	break;
+{printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
+
+	break;}
     
     else // chunk is full 
   {
@@ -375,11 +380,11 @@ public:
     // if multiple threads try to perform the CAS simultaneously, only one of them will succeed. The rest will go ahead and
     // execute the else branch.
      {
-       //printf("CAS succeeded\n");
        GPUChunk<CHUNK_SIZE,T> * newChunk = get_new_chunk();
-       //printf("got new chunk\n");
+       printf("got new chunk for PUSH_BACK\n");
        currentChunk->next = newChunk;
        newChunk->prev = currentChunk; // creating a doublely linked list to support pop_back();
+       //currentChunk->nextFreeValue = CHUNK_SIZE;
        *xyz_d = 0;
        //currentChunk = newChunk; // updating the currentChunk to newChunk;
      }
@@ -407,7 +412,16 @@ public:
    
   }
 
+
   }
+
+
+ // __syncthreads();
+  if(blockIdx.x == 0 && threadIdx.x ==0)
+{
+  GPUChunk<CHUNK_SIZE,T> * temp = (GPUChunk<CHUNK_SIZE,T> *)  vec;
+  while(temp->next != NULL){ temp->nextFreeValue = CHUNK_SIZE; temp = temp->next;}
+}
  }
 
 
@@ -417,37 +431,45 @@ public:
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
    /* TODO: traverse the arena to get to the last chunk of the current vector
  * which has atleast one element */
+  GPUChunk<CHUNK_SIZE,T> * parent;
+ 
   while(currentChunk->next != NULL) // getting to the last chunk of the vec
   {
    currentChunk = currentChunk->next;
   }
-
+ parent = currentChunk->prev;
+     //printf("parent chunksize outside while = %d\n",parent->nextFreeValue);
+  
   while(true)
  {
   bool status = currentChunk->pop_back();
-  if (status == true)  break;
+  if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
+   break;}
   
  else  // the current chunk has no element
   {
+     //printf("parent chunksize = %d\n",parent->nextFreeValue);
      // The thread that pops the last element in the chunk should change the things.
      if(currentChunk->prev != NULL)
     {
      if(atomicCAS(uvw_d,0,1)==0)  // only one thread goes inside
      {
-      printf("want new chunk\n");
+      printf("want new chunk for POP_BACK\n");
       // set the *prev of the current chunk and *next of the parent chunk to NULL 
-      GPUChunk<CHUNK_SIZE,T> * parent = currentChunk->prev;
+      //GPUChunk<CHUNK_SIZE,T> * parent = currentChunk->prev;
+      parent = currentChunk->prev;
       currentChunk->prev = NULL; // isolating that node since a chunk can only be a part of one vector.
       //currentChunk->next = NULL; // already null. that is why we stopped at this node. Otherwise we would have marched ahead in the linked list.
       parent->next = NULL; // isolating currentChunk;
-      //currentChunk = parent;	
+     // currentChunk = parent;	
       // *uvw_d = 0; // to test
 
-      if(currentChunk == &chunks[*nextFreeChunk_d - 1]) // the current chunk is the last exposed chunk from the arena, so we can reclaim it.
-	reclaim_chunk();// call the routine "reclaim_chunk()"
+    //  if(currentChunk == &chunks[*nextFreeChunk_d - 1]) // the current chunk is the last exposed chunk from the arena, so we can reclaim it.
+   //	reclaim_chunk();// call the routine "reclaim_chunk()"
        *uvw_d = 0;
      }
      while(*uvw_d == 1); // barrier for all threads.
+     //currentChunk = parent;	
     } 
     //  FIXME: currentChunk not updated properly. 
        
@@ -455,7 +477,7 @@ public:
       // and set the current chunk to the previous chunk.
       // regarding the counter nextFreeChunk_d, reduce it only if the current  value is equal to the current chunk(i.e. the chunk being popped from happens to be the last exposed chunk in the arena). Otherwise not.
          
-   else if(currentChunk->prev == NULL) //  the thread is pointing to a node that is not a part of any vector
+   else if(currentChunk->prev == NULL && parent != NULL) //  the thread is pointing to a node that is not a part of any vector
    {
     // set the current chunk correctly
     // look for a valid chunk of the vector again
@@ -464,15 +486,21 @@ public:
    {
      currentChunk = currentChunk->next;
    }
- //  if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
- //  	break;
+    //currentChunk = parent;
+    
+   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
+   	break;
    }
 
 //  if((currentChunk->prev == NULL) && (currentChunk->next == NULL) && (currentChunk ==  (GPUChunk<CHUNK_SIZE,T>*) vec)) // current chunk is the head chunk of the vector and is empty
 //   {
-//    printf("hello\n");
-//    break;
+//   // printf("hello\n");
+//   // break;
 //   }
+  
+//   else if(currentChunk->prev == NULL && parent == NULL)
+//          break;
+
   }  
 
  }
