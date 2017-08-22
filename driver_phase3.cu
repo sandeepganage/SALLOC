@@ -82,7 +82,7 @@ int main(int argc, char** argv)
   //kernel2<<<1,25>>>(arena, v1,v2);
   //kernel3<<<1,5>>>(arena, v1,v2);
   //kernel2<<<1,18>>>(arena, v1,v2);
-  kernel4<<<1,18>>>(arena, v1);
+  kernel4<<<1,25>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }

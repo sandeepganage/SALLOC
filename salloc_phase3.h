@@ -345,13 +345,18 @@ public:
  // v[i]++;
 
 // this function returns the index of the arena for a corresponding index of vector
+//
+// It is the responsibility of the user to check for array bounds when specifying index of vector. If the vector bound is incorrect, 
+// the function will return random values. 
+// The function does not check for array bounds since it does not maintain size of vector or any other meta information.
+//
 __device__ int getIndex(T* vec, int vecIndex)
 {
  GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
  //int vecEleCount = 0;
  
  int vecIndexChunk = vecIndex/CHUNK_SIZE ; // finding the probable chunk id of the vector in which the specified index of the vector will reside 
- //printf("%d\n",vecIndexChunk); // tested correct.
+ //printf("vecIndexChunk = %d\n",vecIndexChunk); // tested correct.
  int temp = 0; // to count the chunk of the vector the thread is at
  while(currentChunk->next != NULL)
 {
@@ -361,8 +366,10 @@ __device__ int getIndex(T* vec, int vecIndex)
  currentChunk = currentChunk->next;
  if(temp == vecIndexChunk) break; // found the correct chunk
 } 
+ 
  // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
-// printf("current chunk Id = %d\n",temp);
+ printf("current chunk Id = %d for threadId = %d\n",temp,threadIdx.x);
+// if((currentChunk->nextFreeValue <= CHUNK_SIZE && currentChunk->nextFreeValue > 0)) // the index of the vector is found
  if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
 {
  // return the corresponding index of arena.
@@ -384,7 +391,7 @@ __device__ int getIndex(T* vec, int vecIndex)
 else // the specified vecIndex is not in vector vec;
 {
  assert(false);
- return -1000;
+ return;
 }
 
 }
