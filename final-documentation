@@ -32,6 +32,33 @@ void push_back( <T>*, <T> element){
 
 }
 
+The push_back() operation pushes a scalar to a location in a chunk.
+
+A shared variable 'nextFreeValue', keeps track of the next free location inside a chunk where the insertion can take place. 'nextFreeValue' is incremented using atomicAdd to avoid data races.
+
+Similarly, 'nextFreeChunk_d' is used to keep track of whether the capacity of the arena is exhausted or not.
+
+If a chunk gets full, but there are other chunks available, then a new chunk is exposed to the user program, from the arena, by incrementing the value of 'chunkCount' atomically and returning the address of the new chunk.
+
+More than one vectors can be allocated and maintained on the arena. Each new vector starts at a new chunk.
+
+Outside the arena, on the GPU, the address of the starting chunk of each vector is stored, as meta-data. These offset addresses are visible to all threads. 
+
+When push_back() is to be performed on a specified vector, each thread first reads-off the address of the chunk for the vector and then proceeds to push_back() into
+the correct chunk.
+
+In cases when a vector spans across multiple chunks, a fully free (new) chunk is requested each time a vector spills to a new chunk. This is done to ensure that a chunk contains the elements of one vector alone. This helps in preventing the data of different vectors from getting mixed up.
+
+ A vector can be traversed by starting at the specified address offset and going over the chunks following the links between chunks.
+
+In case a new chunk is to added to the vector, a single thread aquires a lock on the last chunk of the  linked list, increments 'nextFreeChunk_d' and adds the new chunk to the linked list.
+
+
+******************************
+
+
+
+
 
 
 
