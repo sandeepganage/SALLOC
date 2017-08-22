@@ -166,19 +166,19 @@ public:
 
  // __device__ 
  // GPUChunk<CHUNK_SIZE,T> * reclaim_chunk()
-  __device__
-   void reclaim_chunk()
-  {
-      printf("hello from reclaim_chunk()\n");
-      int id = atomicAdd(nextFreeChunk_d,-1);
-
-      if(id <= 0) {
-        printf("GPUArena empty\n");
-        assert(false);
-       // return NULL;
-      }
-      //return &chunks[id]; // returns the address of the new chunk
-   }
+//  __device__
+//   void reclaim_chunk()
+//  {
+//      printf("hello from reclaim_chunk()\n");
+//      int id = atomicAdd(nextFreeChunk_d,-1);
+//
+//      if(id <= 0) {
+//        printf("GPUArena empty\n");
+//        assert(false);
+//       // return NULL;
+//      }
+//      //return &chunks[id]; // returns the address of the new chunk
+//   }
  
 
 
@@ -526,7 +526,11 @@ else // the specified vecIndex is not in vector vec;
   //  break;  
  
    if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0)
+  {
+	printf("Nothing to pop !\n");
    	break;
+ 
+  }
   bool status = currentChunk->pop_back();
   if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
    break;}
