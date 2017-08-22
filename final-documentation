@@ -102,8 +102,15 @@ The index so computed is returned.
 	
 }
 
+This is a host API, for allocating multiple vectors on the arena.
 
+A call to this API does the following
+1. returns the address of the next free chunk on the arena 
+2. increments the value of 'nextFreeChunk_d' by 1 to reserve a chunk for itself.
 
+As a result of the above, the API call sets aside 1 chunk for the newly created vector, however it reserves exaclty one chunk (of size CHUNK_SIZE) in the arena, irrespective of the requested size.
+
+****************************************
 
 
 
