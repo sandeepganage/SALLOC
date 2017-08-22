@@ -343,17 +343,38 @@ public:
  // usage:
  // int i = getIndex(v,index);
  // v[i]++;
-  __device__ int 
-  getIndex(T* v, int index) // here index is the vector index
+
+// this function returns the index of the arena for a corresponding index of vector
+__device__ int getIndex(T* vec, int vecIndex)
 {
-  GPUChunk<CHUNK_SIZE,T> * v1 = (GPUChunk<CHUNK_SIZE,T> *) v;
- // printf("\nprint from getIndex\n ");
- // printf("%d\n",v[index]);
- // printf("%d\n", v1->values[index]);
-
-
- // invoke an iterator to go over the arena starting from the specified chunk and follow the links to access all elements of a vector. In the process compute the cunks
+ GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+ int vecEleCount = 0;
+ 
+ int vecIndexChunk = vecIndex/CHUNK_SIZE ; // finding the probable chunk id of the vector in which the specified index of the vector will reside 
+ int temp = 0; // to count the chunk of the vector the thread is at
+ while(currentChunk->next != NULL)
+{
+ // traverse the vector to get to the vecIndexChunk of the vector. Break out of the while loop after that.
+ temp++;
+ currentChunk = currentChunk->next;
+ if(temp == vecIndexChunk) break; // found the correct chunk
+} 
+ // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
+ if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
+{
+ // return the corresponding index of arena.
+ // computing the corresponding index of arena
+ int arenaIndex = ((currentChunk - chunks)/sizeof(GPUChunk<CHUNK_SIZE,T>)) + vecIndex;
+ return arenaIndex;
+} 
+else // the specified vecIndex is not in vector vec;
+{
+ assert(false);
+ return;
 }
+
+}
+
 
  __device__ void push_back(T* vec, T ele)
  {
@@ -513,36 +534,6 @@ public:
  }
 }
 
-// this function returns the index of the arena for a corresponding index of vector
-__device__ int getIndex(T* vec, vecIndex)
-{
- GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
- int vecEleCount = 0;
- 
- int vecIndexChunk = vecIndex/CHUNK_SIZE ; // finding the probable chunk id of the vector in which the specified index of the vector will reside 
- int temp = 0; // to count the chunk of the vector the thread is at
- while(currentChunk->next != NULL)
-{
- // traverse the vector to get to the vecIndexChunk of the vector. Break out of the while loop after that.
- temp++;
- currentChunk = currentChunk->next;
- if(temp == vecIndexChunk) break; // found the correct chunk
-} 
- // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
- if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
-{
- // return the corresponding index of arena.
- // computing the corresponding index of arena
- int arenaIndex = ((currentChunk - chunks)/sizeof(GPUChunk<CHUNK_SIZE,T>)) + vecIndex;
- return arenaIndex;
-} 
-else // the specified vecIndex is not in vector vec;
-{
- assert(false);
- return;
-}
-
-}
 
 #endif 
 
