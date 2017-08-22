@@ -64,6 +64,10 @@ class GPUChunk {
     }
 
     __device__ bool pop_back() {
+
+// FIXME: correct the indexing part. Do not allow extra threads to do an atomic decrement if they will fail the condition (id < 0)
+
+/****************************************************************/
       int id = atomicAdd(&nextFreeValue,-1);
 //      printf("id = %d\n",nextFreeValue);
       if(id > 0) {
@@ -76,7 +80,7 @@ class GPUChunk {
        // return;
 	
     }
-       
+/*****************************************************************/       
     }
 
 };
@@ -442,9 +446,11 @@ public:
   
   while(true)
  {
-  if(((GPUChunk<CHUNK_SIZE,T>*) vec)->nextFreeValue < 0)
-    break;  
+  //if(((GPUChunk<CHUNK_SIZE,T>*) vec)->nextFreeValue < 0)
+  //  break;  
  
+   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
+   	break;
   bool status = currentChunk->pop_back();
   if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
    break;}
@@ -491,8 +497,6 @@ public:
    }
     //currentChunk = parent;
     
-   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
-   	break;
    }
 
 //  if((currentChunk->prev == NULL) && (currentChunk->next == NULL) && (currentChunk ==  (GPUChunk<CHUNK_SIZE,T>*) vec)) // current chunk is the head chunk of the vector and is empty
