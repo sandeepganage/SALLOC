@@ -442,6 +442,9 @@ public:
   
   while(true)
  {
+  if(((GPUChunk<CHUNK_SIZE,T>*) vec)->nextFreeValue < 0)
+    break;  
+ 
   bool status = currentChunk->pop_back();
   if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
    break;}
