@@ -513,7 +513,39 @@ public:
  }
 }
 
+// this function returns the index of the arena for a corresponding index of vector
+__device__ int getIndex(T* vec, vecIndex)
+{
+ GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+ int vecEleCount = 0;
+ 
+ int vecIndexChunk = vecIndex/CHUNK_SIZE ; // finding the probable chunk id of the vector in which the specified index of the vector will reside 
+ int temp = 0; // to count the chunk of the vector the thread is at
+ while(currentChunk->next != NULL)
+{
+ // traverse the vector to get to the vecIndexChunk of the vector. Break out of the while loop after that.
+ temp++;
+ currentChunk = currentChunk->next;
+ if(temp == vecIndexChunk) break; // found the correct chunk
+} 
+ // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
+ if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
+{
+ // return the corresponding index of arena.
+ // computing the corresponding index of arena
+ int arenaIndex = ((currentChunk - chunks)/sizeof(GPUChunk<CHUNK_SIZE,T>)) + vecIndex;
+ return arenaIndex;
+} 
+else // the specified vecIndex is not in vector vec;
+{
+ assert(false);
+ return;
+}
+
+}
+
 #endif 
+
 
 };
 
