@@ -1,0 +1,39 @@
+As part of GSoC 2017, I implemented an arena based memory allocator in CUDA.
+It supports the vector container on GPUs.
+The following functionalities are supported by this vector Container.
+* push_back() 
+* pop_back() 
+* getIndex()
+
+The memory allocator supports multiple vectors. push_back() and pop_back can be performed on multiple vectors concurrently.
+
+Implementation Procedure/Details :
+
+The memory allocation should be thread safe.
+To ensure thread safe behaviour of the memory operation, we pre-allocate a large chunk of memory on the GPU from CPU using the cudaMalloc() API. This pre-allocated space is called 'arena'.
+
+The arena is organised as an aray of a said 'capacity', divided into chunks.
+The capacity is user specified.
+
+A Chunk contains an array of 'CHUNK_SIZE' of type '<T>'. Other fields in a chunk include next, prev pointers to other chunks in the same arena.
+
+A Chunk can only contain elements of a single vector. A vector however span across multiple chunks. 
+
+The set of all chunks that comprise a vector are organised as a doubly linked list.
+
+
+
+
+************************
+
+push_back()
+
+void push_back( <T>*, <T> element){
+
+}
+
+
+
+
+
+
