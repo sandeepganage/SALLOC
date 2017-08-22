@@ -57,7 +57,13 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 __global__ void kernel3(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 {
   unsigned tid = threadIdx.x;
-  a.push_back(v1,tid);
+  a.push_back(v2,tid);
+}
+
+__global__ void kernel4(GPUArena<CHUNK_SZ,T1> a, T1* v1)
+{
+  unsigned tid = threadIdx.x;
+  printf("global index of v1[%d] = %d\n",tid,a.getIndex(v1,tid));
 }
 
 int main(int argc, char** argv)
@@ -71,10 +77,12 @@ int main(int argc, char** argv)
   T1 * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
+  T1 * v3 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel1<<<1,23>>>(arena, v1,v2);
-  kernel2<<<1,25>>>(arena, v1,v2);
-  kernel3<<<1,5>>>(arena, v1,v2);
-  kernel2<<<1,18>>>(arena, v1,v2);
+  //kernel2<<<1,25>>>(arena, v1,v2);
+  //kernel3<<<1,5>>>(arena, v1,v2);
+  //kernel2<<<1,18>>>(arena, v1,v2);
+  kernel4<<<1,18>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }
