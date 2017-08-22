@@ -52,34 +52,66 @@ class GPUChunk {
 
     __device__
     bool push_back(T value) {
-      int id = atomicAdd(&nextFreeValue, 1);
-      if(id < CHUNK_SIZE) {
-        printf("push_back succeeded!\n");
-        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
-        values[id] = value;
-        return true;
-      } else {
-        return false;
-      }
-    }
+
+// FIXED: correct the indexing part. Do not allow extra threads to do an atomic increment if they will fail the condition (id > CHUNK_SIZE)
+   if(atomicAdd(&nextFreeValue,1) < CHUNK_SIZE)
+   {
+      printf("push_back succeeded!\n");
+      return true;
+   }
+     
+   else 
+   {
+      nextFreeValue = CHUNK_SIZE;
+      return false;
+   }
+
+   
+
+/**********************************************************************/
+//      int id = atomicAdd(&nextFreeValue, 1);
+//      if(id < CHUNK_SIZE) {
+//        printf("push_back succeeded!\n");
+//        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
+//        values[id] = value;
+//        return true;
+//      } else {
+//        return false;
+//      }
+/********************************************************************/
+  }
 
     __device__ bool pop_back() {
 
-// FIXME: correct the indexing part. Do not allow extra threads to do an atomic decrement if they will fail the condition (id < 0)
+// FIXED: correct the indexing part. Do not allow extra threads to do an atomic decrement if they will fail the condition (id < 0)
+
+// TODO: make pop_back() return the value it pops.
+
+   if(atomicAdd(&nextFreeValue,-1) > 0)
+   {
+      printf("pop_back succeeded!\n");
+      return true;
+   }
+     
+   else 
+   {
+      nextFreeValue = 0;
+      return false;
+   }
 
 /****************************************************************/
-      int id = atomicAdd(&nextFreeValue,-1);
-//      printf("id = %d\n",nextFreeValue);
-      if(id > 0) {
-        printf("pop_back succeeded!\n");
-        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
-        //return values[id];
-        return true;
-      } else {
-        return false;
-       // return;
-	
-    }
+//      int id = atomicAdd(&nextFreeValue,-1);
+////      printf("id = %d\n",nextFreeValue);
+//      if(id > 0) {
+//        printf("pop_back succeeded!\n");
+//        //printf("threadId = %d, nextFreeValue = %d\n",threadIdx.x,id);
+//        //return values[id];
+//        return true;
+//      } else {
+//        return false;
+//       // return;
+//	
+//    }
 /*****************************************************************/       
     }
 
@@ -463,11 +495,13 @@ else // the specified vecIndex is not in vector vec;
 
 
  // __syncthreads();
-  if(blockIdx.x == 0 && threadIdx.x ==0)
-{
-  GPUChunk<CHUNK_SIZE,T> * temp = (GPUChunk<CHUNK_SIZE,T> *)  vec;
-  while(temp->next != NULL){ temp->nextFreeValue = CHUNK_SIZE; temp = temp->next;}
-}
+/**********************************************************************************************/
+//  if(blockIdx.x == 0 && threadIdx.x ==0)
+//{
+//  GPUChunk<CHUNK_SIZE,T> * temp = (GPUChunk<CHUNK_SIZE,T> *)  vec;
+//  while(temp->next != NULL){ temp->nextFreeValue = CHUNK_SIZE; temp = temp->next;}
+//}
+/*********************************************************************************************/
  }
 
 
@@ -491,7 +525,7 @@ else // the specified vecIndex is not in vector vec;
   //if(((GPUChunk<CHUNK_SIZE,T>*) vec)->nextFreeValue < 0)
   //  break;  
  
-   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= -1)
+   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0)
    	break;
   bool status = currentChunk->pop_back();
   if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);

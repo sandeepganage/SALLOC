@@ -79,10 +79,10 @@ int main(int argc, char** argv)
   T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   T1 * v3 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel1<<<1,23>>>(arena, v1,v2);
-  //kernel2<<<1,25>>>(arena, v1,v2);
-  //kernel3<<<1,5>>>(arena, v1,v2);
-  //kernel2<<<1,18>>>(arena, v1,v2);
-  kernel4<<<1,25>>>(arena, v1);
+  kernel2<<<1,25>>>(arena, v1,v2);
+  kernel1<<<1,5>>>(arena, v1,v2);
+  kernel2<<<1,18>>>(arena, v1,v2);
+  //kernel4<<<1,25>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }
