@@ -36,6 +36,7 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 
 #define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
+
 // Creating the arena
  
 template <int CHUNK_SIZE, typename T>
@@ -47,16 +48,17 @@ class GPUChunk {
     GPUChunk<CHUNK_SIZE, T> *next; // pointer to the next chunk
     // required for pop_back()
     GPUChunk<CHUNK_SIZE, T> *prev; // pointer to the previous chunk
-    
-    
 
     __device__
     bool push_back(T value) {
 
+   int t;
+   t =  atomicAdd(&nextFreeValue,1);
 // FIXED: correct the indexing part. Do not allow extra threads to do an atomic increment if they will fail the condition (id > CHUNK_SIZE)
-   if(atomicAdd(&nextFreeValue,1) < CHUNK_SIZE)
+   if(t < CHUNK_SIZE)
    {
       printf("push_back succeeded!\n");
+      values[t] = value;
       return true;
    }
      
@@ -81,16 +83,23 @@ class GPUChunk {
 /********************************************************************/
   }
 
-    __device__ bool pop_back() {
+   // __device__ struct Data  pop_back() {
 
 // FIXED: correct the indexing part. Do not allow extra threads to do an atomic decrement if they will fail the condition (id < 0)
 
 // TODO: make pop_back() return the value it pops.
 
-   if(atomicAdd(&nextFreeValue,-1) > 0)
+    __device__ bool  pop_back(T &tempVal) {
+
+   int t;
+   t =  atomicAdd(&nextFreeValue,-1);
+   if(t  > 0)
    {
+      //datum.data = values[t];
+      //datum.truthVal = true;
       printf("pop_back succeeded!\n");
-      return true;
+      tempVal = values[t];
+      return true; 
    }
      
    else 
@@ -505,7 +514,7 @@ else // the specified vecIndex is not in vector vec;
  }
 
 
- __device__ void pop_back(T* vec)
+ __device__ T pop_back(T* vec)
 {
 // FIXME: currently pop_back pops as many elements as requested even if the value is not there an then gets stuck 
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
@@ -520,6 +529,8 @@ else // the specified vecIndex is not in vector vec;
  parent = currentChunk->prev;
      //printf("parent chunksize outside while = %d\n",parent->nextFreeValue);
   
+ T tempVal; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
+ 
   while(true)
  {
   //if(((GPUChunk<CHUNK_SIZE,T>*) vec)->nextFreeValue < 0)
@@ -531,9 +542,15 @@ else // the specified vecIndex is not in vector vec;
    	break;
  
   }
-  bool status = currentChunk->pop_back();
+
+//  T popdata = currentChunk->pop_back();
+  bool status = currentChunk->pop_back(tempVal);
   if (status == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
-   break;}
+//  if (currentChunk->truthVal == true)  {//printf("nextFreeChunk = %d\n",*nextFreeChunk_d);
+     //return popdata;
+   return tempVal; 
+   //break;
+   }
   
  else  // the current chunk has no element
   {

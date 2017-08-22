@@ -42,7 +42,7 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  a.pop_back(v1); printf("pop_back from v1\n");
+  printf("pop value = %d\n",a.pop_back(v1)); //printf("pop_back from v1\n");
  // a.pop_back(v2); printf("pop_back from v2\n");
 //  printf("v[%d] = %d\n", tid,v[tid]); 
 //  v[1]= 2; 
@@ -79,10 +79,10 @@ int main(int argc, char** argv)
   T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   T1 * v3 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel1<<<1,23>>>(arena, v1,v2);
-  kernel2<<<1,25>>>(arena, v1,v2);
-  kernel1<<<1,5>>>(arena, v1,v2);
-  kernel2<<<1,18>>>(arena, v1,v2);
-  //kernel4<<<1,25>>>(arena, v1);
+  kernel2<<<1,5>>>(arena, v1,v2);
+//  kernel1<<<1,5>>>(arena, v1,v2);
+//  kernel3<<<1,18>>>(arena, v1,v2);
+//  kernel3<<<1,25>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }
