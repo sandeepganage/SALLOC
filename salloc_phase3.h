@@ -270,6 +270,12 @@ else // the specified vecIndex is not in vector vec;
   }
 
   }
+//__syncthreads(); 
+//  if(threadIdx.x == 0)
+//{
+//  currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; 
+//  while(currentChunk->next != NULL) {currentChunk->nextFreeValue = CHUNK_SIZE; currentChunk = currentChunk->next; }
+//}  
 
  }
 
