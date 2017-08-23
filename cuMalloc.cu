@@ -4,7 +4,6 @@
 __global__ void mallocTest()
 {
     int* ptr = (int*)malloc(sizeof(int));
-    //printf("Thread %d got pointer: %p\n", threadIdx.x, ptr);
     free(ptr);
 }
 
