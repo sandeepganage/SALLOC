@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <cuda.h>
-#include "salloc_phase3.h"
+#include "salloc.h"
 
 #define CHUNK_SZ 50 // size of a chunk
 #define CAP 1600 // number of chunks in the chunk
