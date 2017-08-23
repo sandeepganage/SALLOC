@@ -59,7 +59,7 @@ class GPUChunk {
      
    else 
    {
-      nextFreeValue = CHUNK_SIZE;
+      nextFreeValue = CHUNK_SIZE-1;
       return false;
    }
   }
@@ -134,8 +134,11 @@ public:
    }
 
  
-#if 1
-
+ /*
+  * Function signature:
+  *  T* createVector(int size)
+  *
+  */
 
    T * createVector(int sz = CHUNK_SIZE) // optional size parameter that defaults to CHUNK_SIZE.
   {
@@ -174,6 +177,15 @@ public:
 // the function will return random values. 
 // The function does not check for array bounds since it does not maintain size of vector or any other meta information.
 
+/*
+ * Function signature:
+ * int getIndex(T* vector, int vectorIndex)
+ *
+ * if vector index is not found in vector, it returns -1.
+ *
+ *
+ * */
+
 __device__ int getIndex(T* vec, int vecIndex)
 {
  GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
@@ -203,6 +215,15 @@ else // the specified vecIndex is not in vector vec;
 }
 
 }
+
+
+/*
+ * Function signature:
+ *
+ * void push_back(T* vector, T elementToPush)
+ *
+ *
+ * */
 
 
  __device__ void push_back(T* vec, T ele)
@@ -254,6 +275,13 @@ else // the specified vecIndex is not in vector vec;
 
  }
 
+/*
+ * Function signature:
+ *
+ * T pop_back(T* vector)
+ *
+ * returns '0' if pop_back() fails.
+ * */
 
  __device__ T pop_back(T* vec)
 {
@@ -272,11 +300,10 @@ else // the specified vecIndex is not in vector vec;
   while(true)
  {
  
-   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0)
+   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0) // the head chunk of vector is empty
   {
-	printf("Nothing to pop !\n");
+	printf("Vector EMPTY! Nothing to pop.\n");
    	break;
- 
   }
 
   bool status = currentChunk->pop_back(tempVal);
@@ -315,7 +342,6 @@ else // the specified vecIndex is not in vector vec;
 }
 
 
-#endif 
 
 
 };

@@ -7,7 +7,7 @@
 #define CHUNK_SZ 5 // size of a chunk
 #define CAP 16 // number of chunks in the chunk
 
-typedef int T1; // 
+typedef char T1; // 
 
 
 __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
@@ -25,7 +25,11 @@ __global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  a.push_back(v1,tid); printf("push_back in v1\n");
+  if(threadIdx.x % 2 == 0)
+  {a.push_back(v1,tid); printf("push_back in v1\n");}
+  else
+   {a.push_back(v2,tid); printf("push_back in v2\n");}
+
  //a.push_back(v2,tid); printf("push_back in v2\n");
  
   //v->values[1] = 2; 
@@ -42,7 +46,8 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  printf("pop value = %d\n",a.pop_back(v1)); //printf("pop_back from v1\n");
+  printf("pop value from v1 = %d\n",a.pop_back(v1)); //printf("pop_back from v1\n");
+  printf("pop value from v2 = %d\n",a.pop_back(v2)); //printf("pop_back from v1\n");
  // a.pop_back(v2); printf("pop_back from v2\n");
 //  printf("v[%d] = %d\n", tid,v[tid]); 
 //  v[1]= 2; 
@@ -80,8 +85,8 @@ int main(int argc, char** argv)
   T1 * v3 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   kernel1<<<1,23>>>(arena, v1,v2);
   kernel2<<<1,25>>>(arena, v1,v2);
-//  kernel1<<<1,5>>>(arena, v1,v2);
-//  kernel3<<<1,18>>>(arena, v1,v2);
+  kernel1<<<1,5>>>(arena, v1,v2);
+  kernel2<<<1,18>>>(arena, v1,v2);
 //  kernel3<<<1,25>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
