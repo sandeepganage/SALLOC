@@ -4,8 +4,8 @@
 #include <cuda.h>
 #include "salloc_phase3.h"
 
-#define CHUNK_SZ 5 // size of a chunk
-#define CAP 16 // number of chunks in the chunk
+#define CHUNK_SZ 50 // size of a chunk
+#define CAP 1600 // number of chunks in the chunk
 
 typedef char T1; // 
 
@@ -16,7 +16,7 @@ __global__ void kernel(GPUArena<CHUNK_SZ,T1> a )
  a.get_new_chunk();
 }
 
-__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
+__global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v3)
 {
   unsigned tid = threadIdx.x;
   //printf("%p\n",v); 
@@ -25,10 +25,10 @@ __global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",v->next);
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
-  if(threadIdx.x % 2 == 0)
-  {a.push_back(v1,tid); printf("push_back in v1\n");}
-  else
-   {a.push_back(v2,tid); printf("push_back in v2\n");}
+//  {a.push_back(v1,tid); printf("push_back in v1\n");}
+   {
+   a.push_back(v1,tid); printf("push_back in v1\n");
+    a.push_back(v3,tid+98); printf("push_back in v3\n");}
 
  //a.push_back(v2,tid); printf("push_back in v2\n");
  
@@ -37,7 +37,7 @@ __global__ void kernel1(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",(v + sizeof(int))); 
 }
 
-__global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
+__global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v3)
 {
   unsigned tid = threadIdx.x;
 //  printf("%p\n",v); 
@@ -47,7 +47,7 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v2)
 //  printf("%p\n",v->prev);
 //  printf("%p\n",v+1); 
   printf("pop value from v1 = %d\n",a.pop_back(v1)); //printf("pop_back from v1\n");
-  printf("pop value from v2 = %d\n",a.pop_back(v2)); //printf("pop_back from v1\n");
+  printf("pop value from v3 = %d\n",a.pop_back(v3)); //printf("pop_back from v1\n");
  // a.pop_back(v2); printf("pop_back from v2\n");
 //  printf("v[%d] = %d\n", tid,v[tid]); 
 //  v[1]= 2; 
@@ -83,10 +83,10 @@ int main(int argc, char** argv)
   //GPUChunk<CHUNK_SZ,T1> * v1 = arena.createVector(); // 'v1' points to a chunk and not to the array inside the chunk.
   T1 * v2 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
   T1 * v3 = arena.createVector(); // we can have a parameter 'size' which can be set to CHUNK_SZ by default.
-  kernel1<<<1,23>>>(arena, v1,v2);
-  kernel2<<<1,25>>>(arena, v1,v2);
-  kernel1<<<1,5>>>(arena, v1,v2);
-  kernel2<<<1,18>>>(arena, v1,v2);
+  kernel1<<<1,100>>>(arena, v1,v3);
+  kernel2<<<1,102>>>(arena, v1,v3);
+//  kernel1<<<1,5>>>(arena, v1,v2,v3);
+//  kernel2<<<1,10>>>(arena, v1,v2,v3);
 //  kernel3<<<1,25>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;

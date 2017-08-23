@@ -59,7 +59,7 @@ class GPUChunk {
      
    else 
    {
-      nextFreeValue = CHUNK_SIZE-1;
+      nextFreeValue = CHUNK_SIZE;
       return false;
    }
   }
@@ -270,7 +270,6 @@ else // the specified vecIndex is not in vector vec;
    
   }
 
-
   }
 
  }
@@ -295,7 +294,7 @@ else // the specified vecIndex is not in vector vec;
   }
  parent = currentChunk->prev;
   
- T tempVal; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
+ T tempVal = 0; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
  
   while(true)
  {
@@ -339,10 +338,8 @@ else // the specified vecIndex is not in vector vec;
   }  
 
  }
+ return tempVal;
 }
-
-
-
 
 };
 
