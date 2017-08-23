@@ -222,7 +222,6 @@ else // the specified vecIndex is not in vector vec;
  *
  * void push_back(T* vector, T elementToPush)
  *
- *
  * */
 
 
@@ -279,7 +278,7 @@ else // the specified vecIndex is not in vector vec;
  *
  * T pop_back(T* vector)
  *
- * returns '0' if pop_back() fails.
+ * returns '-1 or garbage' if pop_back() fails.
  * */
 
  __device__ T pop_back(T* vec)
@@ -294,7 +293,7 @@ else // the specified vecIndex is not in vector vec;
   }
  parent = currentChunk->prev;
   
- T tempVal = 0; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
+ T tempVal = -1; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
  
   while(true)
  {
