@@ -4,7 +4,8 @@ It has support for vector container on GPUs.
 	The following operations are supported on this vector container in the arena.
 	* push_back() 
 	* pop_back() 
-* getIndex()
+        * getIndex()
+	* vecSize()
 
 	In addition, the memory allocator supports allocation of multiple vectors. push_back() and pop_back() can be performed on multiple vectors concurrently.
 
