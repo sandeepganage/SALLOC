@@ -26,7 +26,7 @@ It has support for vector container on GPUs.
 
 	7. The 'nextFreeChunk_d' field holds the offset to the next free chunk in the arena.
 
-	The various operations supported on the vector container are discussed below:
+	The various operations supported on the vector container on the arena are discussed below:
 
 I. push_back()
 --------------
