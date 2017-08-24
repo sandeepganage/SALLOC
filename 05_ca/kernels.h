@@ -70,10 +70,20 @@ void debug_input_data(const GPUEvent* event, const GPULayerDoublets* gpuDoublets
     }
 }
 
+/*****************************************************************************/
+//template<int maxNumberOfQuadruplets>
+//__global__
+//void kernel_create(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
+//        const GPULayerHits* gpuHitsOnLayers, GPUCACell* cells, GPUSimpleVector<100, unsigned int> * isOuterHitOfCell,
+//        GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet>* foundNtuplets, const Region* region,
+//        unsigned int maxNumberOfDoublets, unsigned int maxNumberOfHits)
+/*****************************************************************************/
+// somesh: changing the kernel's signature.
+ 
 template<int maxNumberOfQuadruplets>
 __global__
-void kernel_create(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
-        const GPULayerHits* gpuHitsOnLayers, GPUCACell* cells, GPUSimpleVector<100, unsigned int> * isOuterHitOfCell,
+void kernel_create(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
+        const GPULayerHits* gpuHitsOnLayers, GPUCACell* cells, T1 ** isOuterHitOfCell, // isOuterHitOfCell is a pointer to a vector
         GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet>* foundNtuplets, const Region* region,
         unsigned int maxNumberOfDoublets, unsigned int maxNumberOfHits)
 {
@@ -101,14 +111,16 @@ void kernel_create(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
             thisCell.init(&gpuDoublets[layerPairIndex], gpuHitsOnLayers, layerPairIndex, globalCellIdx,
                     gpuDoublets[layerPairIndex].indices[2 * i], outerHitId, region->region_origin_x,  region->region_origin_y);
 
-            isOuterHitOfCell[globalFirstHitIdx+outerHitId].push_back_ts(globalCellIdx);
+            //isOuterHitOfCell[globalFirstHitIdx+outerHitId].push_back_ts(globalCellIdx);
+// somesh: replacing push_back_ts with push_back from SALLOC. 
+            myArena.push_back(isOuterHitOfCell[globalFirstHitIdx+outerHitId],globalCellIdx);
         }
     }
 }
 
 template<int maxNumberOfQuadruplets>
 __global__
-void kernel_debug(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
+void kernel_debug(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
         const GPULayerHits* gpuHitsOnLayers, GPUCACell* cells, GPUSimpleVector<100, unsigned int> * isOuterHitOfCell,
         GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet>* foundNtuplets,const Region* region,
         const float thetaCut, const float phiCut, const float hardPtCut,
@@ -234,11 +246,19 @@ void kernel_debug(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
     }
 }
 
+/*************************************************/
+//__global__
+//void kernel_connect(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const GPULayerDoublets* gpuDoublets, GPUCACell* cells,
+//        GPUSimpleVector<100, unsigned int> * isOuterHitOfCell, const Region* region,
+//        const float thetaCut, const float phiCut, const float hardPtCut,
+//        unsigned int maxNumberOfDoublets, unsigned int maxNumberOfHits)
+/**************************************************/
 __global__
-void kernel_connect(const GPUEvent* event, const GPULayerDoublets* gpuDoublets, GPUCACell* cells,
-        GPUSimpleVector<100, unsigned int> * isOuterHitOfCell, const Region* region,
+void kernel_connect(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const GPULayerDoublets* gpuDoublets, GPUCACell* cells,
+       T1 ** isOuterHitOfCell, const Region* region,
         const float thetaCut, const float phiCut, const float hardPtCut,
         unsigned int maxNumberOfDoublets, unsigned int maxNumberOfHits)
+
 {
     unsigned int numberOfLayerPairs = event->numberOfLayerPairs;
     float ptmin, region_origin_x, region_origin_y, region_origin_radius;
@@ -282,7 +302,7 @@ void kernel_connect(const GPUEvent* event, const GPULayerDoublets* gpuDoublets, 
 }
 
 __global__
-void kernel_debug_connect(const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
+void kernel_debug_connect(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const GPULayerDoublets* gpuDoublets,
         GPUCACell* cells, GPUSimpleVector<100, unsigned int> * isOuterHitOfCell,
         const Region* region, unsigned int maxNumberOfDoublets, unsigned int maxNumberOfHits)
 {

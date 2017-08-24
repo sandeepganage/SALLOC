@@ -375,8 +375,8 @@ int main(int argc, char** argv)
 
     std::vector<std::vector<GPUCACell> > hostWorker_theCells;
     hostWorker_theCells.resize(numberOfCPUOnlyThreads);
-    std::vector<std::vector<GPUSimpleVector<maxCellsPerHit, unsigned int> > > hostWorker_isOuterHitOfCell;
-    hostWorker_isOuterHitOfCell.resize(numberOfCPUOnlyThreads);
+    std::vector<std::vector<GPUSimpleVector<maxCellsPerHit, unsigned int> > > hostWorker_isOuterHitOfCell;// on cpu. so no change required.
+    hostWorker_isOuterHitOfCell.resize(numberOfCPUOnlyThreads); // on cpu. so no change required.
     std::vector<GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet> > hostWorker_foundNtuplets;
     hostWorker_foundNtuplets.resize(numberOfCPUOnlyThreads);
 
@@ -386,7 +386,7 @@ int main(int argc, char** argv)
     for(int i = 0; i <numberOfCPUOnlyThreads;++i )
     {
         hostWorker_theCells[i].resize(maxNumberOfLayerPairs * maxNumberOfDoublets);
-        hostWorker_isOuterHitOfCell[i].resize(maxNumberOfLayers * maxNumberOfHits);
+        hostWorker_isOuterHitOfCell[i].resize(maxNumberOfLayers * maxNumberOfHits); // on cpu. so no change required.
 
 
 
@@ -423,11 +423,11 @@ int main(int argc, char** argv)
     std::vector<GPUCACell*> device_theCells;
     device_theCells.resize(nGPUs);
 
-    std::vector<T1*> device_isOuterHitOfCell; // somesh
+    std::vector<T1*> device_isOuterHitOfCell; // somesh: creating a vector of pointers to T1. 
 
 
-    //std::vector<GPUSimpleVector<maxCellsPerHit, unsigned int>*> device_isOuterHitOfCell; //a vector of 1D arrays
-    device_isOuterHitOfCell.resize(nGPUs);
+    //std::vector<GPUSimpleVector<maxCellsPerHit, unsigned int>*> device_isOuterHitOfCell; // somesh: a vector of 1D arrays
+    device_isOuterHitOfCell.resize(nGPUs); // no change required since it is still valid
     std::vector<GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet> *> d_foundNtuplets;
     d_foundNtuplets.resize(nGPUs);
 
@@ -473,7 +473,9 @@ int main(int argc, char** argv)
                 eventsPreallocatedOnGPU * maxNumberOfLayerPairs * maxNumberOfDoublets
                         * sizeof(GPUCACell));
 
-        device_isOuterHitOfCell[gpuIndex] = arena.createVector(); // somesh
+        device_isOuterHitOfCell[gpuIndex] = arena.createVector(); // somesh: creating a vector(computing the offset) and storing its address in the pointer
+/*********************************************************************************************/
+// somesh: commented out the below lines since it is taken care of in the one above.
 
 //        cudaMalloc(&device_isOuterHitOfCell[gpuIndex],
 //                eventsPreallocatedOnGPU * maxNumberOfLayers * maxNumberOfHits
@@ -482,6 +484,9 @@ int main(int argc, char** argv)
 //        cudaMemset(device_isOuterHitOfCell[gpuIndex], 0,
 //                eventsPreallocatedOnGPU * maxNumberOfLayers * maxNumberOfHits
 //                        * sizeof(GPUSimpleVector<maxCellsPerHit, unsigned int> ));
+
+/********************************************************************************************/
+
         //////////////////////////////////////////////////////////
         // ALLOCATIONS FOR THE RESULTS
         //////////////////////////////////////////////////////////
@@ -624,19 +629,25 @@ double start = omp_get_wtime();
                 dim3 numberOfBlocks_find(8, h_allEvents[i].numberOfRootLayerPairs);
 // KERNELS
 //        debug_input_data<<<1,1,0,streams[streamIndex]>>>(&d_events[streamIndex], &d_doublets[d_firstLayerPairInEvt], &d_layers[d_firstLayerInEvt],d_regionParams,  maxNumberOfHits );
-                kernel_create<<<numberOfBlocks_create,256,0,streams[gpuIndex][streamIndex]>>>(&d_events[gpuIndex][streamIndex], &d_doublets[gpuIndex][d_firstLayerPairInEvt],
+                kernel_create<<<numberOfBlocks_create,256,0,streams[gpuIndex][streamIndex]>>>(arena, &d_events[gpuIndex][streamIndex], &d_doublets[gpuIndex][d_firstLayerPairInEvt],
                         &d_layers[gpuIndex][d_firstLayerInEvt], &device_theCells[gpuIndex][d_firstLayerPairInEvt*maxNumberOfDoublets],
                         &device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], &d_foundNtuplets[gpuIndex][streamIndex],d_regionParams[gpuIndex], maxNumberOfDoublets, maxNumberOfHits);
+// somesh: here we are passing the address of an element in the 2D-vector device_isOuterHitOfCell. So this need not change 
+// (check: is the starting address of vector device_isOuterHitOfCell[gpuIndex] required to be passed to the kernel explicitly, as a separate kernel.) 
+
+
 
 ////
-//        kernel_debug<<<1,1,0,streams[streamIndex]>>>(&d_events[streamIndex], &d_doublets[d_firstLayerPairInEvt],
+//        kernel_debug<<<1,1,0,streams[streamIndex]>>>(arena, &d_events[streamIndex], &d_doublets[d_firstLayerPairInEvt],
 //                &d_layers[d_firstLayerInEvt], &device_theCells[d_firstLayerPairInEvt*maxNumberOfDoublets],
 //                &device_isOuterHitOfCell[d_firstHitInEvent], &d_foundNtuplets[streamIndex],
 //                d_regionParams, theThetaCut, thePhiCut,theHardPtCut,maxNumberOfDoublets, maxNumberOfHits);
-                kernel_connect<<<numberOfBlocks_connect,256,0,streams[gpuIndex][streamIndex]>>>(&d_events[gpuIndex][streamIndex],
+                kernel_connect<<<numberOfBlocks_connect,256,0,streams[gpuIndex][streamIndex]>>>(arena, &d_events[gpuIndex][streamIndex],
                         &d_doublets[gpuIndex][d_firstLayerPairInEvt], &device_theCells[gpuIndex][d_firstLayerPairInEvt*maxNumberOfDoublets],
                         &device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], d_regionParams[gpuIndex], theThetaCut, thePhiCut,
                         theHardPtCut, maxNumberOfDoublets, maxNumberOfHits);
+// somesh: here we are passing the address of an element in the 2D-vector device_isOuterHitOfCell. So this need not change 
+// (check: is the starting address of vector device_isOuterHitOfCell[gpuIndex] required to be passed to the kernel explicitly, as a separate kernel.) 
 
 //        kernel_debug_connect<<<1,1,0,streams[streamIndex]>>>(&d_events[streamIndex], &d_doublets[d_firstLayerPairInEvt],
 //                &device_theCells[d_firstLayerPairInEvt*maxNumberOfDoublets], &device_isOuterHitOfCell[d_firstHitInEvent],
@@ -654,11 +665,14 @@ double start = omp_get_wtime();
                         &d_foundNtuplets[gpuIndex][streamIndex],
                         sizeof(GPUSimpleVector<maxNumberOfQuadruplets, Quadruplet> ),
                         cudaMemcpyDeviceToHost, streams[gpuIndex][streamIndex]);
-                cudaMemsetAsync(&device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], 0,
-                        maxNumberOfLayers * maxNumberOfHits
-                                * sizeof(GPUSimpleVector<maxCellsPerHit, unsigned int> ),
-                        streams[gpuIndex][streamIndex]);
+/*****************************************************************************************************/
+// somesh: this block is not required since device_isOuterHitOfCell[gpuIndex] is already initialized to 0 as it is on the arena. 
 
+//                cudaMemsetAsync(&device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], 0,
+//                        maxNumberOfLayers * maxNumberOfHits
+//                                * sizeof(GPUSimpleVector<maxCellsPerHit, unsigned int> ),
+//                        streams[gpuIndex][streamIndex]);
+/****************************************************************************************************/
 //        cudaStreamSynchronize(streams[streamIndex]);
 //        std::cout << "found quadruplets " << h_foundNtuplets[streamIndex].size() << std::endl;
 
@@ -711,10 +725,10 @@ double start = omp_get_wtime();
                         hostWorker_theCells[CPUOnlyThreadId],
                         hostWorker_isOuterHitOfCell[CPUOnlyThreadId], &h_rootLayerPairs[maxNumberOfRootLayerPairs * i], &hostWorker_foundNtuplets[CPUOnlyThreadId],
                         h_regionParams, theThetaCut, thePhiCut, theHardPtCut, maxNumberOfDoublets,
-                        maxNumberOfHits);
+                        maxNumberOfHits); // on the CPU. So no change required
                 for(unsigned int j = 0; j < hostWorker_isOuterHitOfCell[CPUOnlyThreadId].size(); ++j)
                 {
-                    hostWorker_isOuterHitOfCell[CPUOnlyThreadId][j].reset();
+                    hostWorker_isOuterHitOfCell[CPUOnlyThreadId][j].reset(); // On the CPU. So no change required.
                 }
 
             }
@@ -760,7 +774,7 @@ double stop = omp_get_wtime();
             cudaFreeHost(tmp_layerDoublets[gpuIndex][i]);
         }
 
-        cudaFree(device_isOuterHitOfCell[gpuIndex]);
+        //cudaFree(device_isOuterHitOfCell[gpuIndex]); // somesh: not required since it is on the arena. We do not need to "free" the space on the arena.
         cudaFree(d_foundNtuplets[gpuIndex]);
 
         cudaFree(d_regionParams[gpuIndex]);
