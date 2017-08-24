@@ -32,7 +32,7 @@
 #include "host_kernels.h"
 
 
-#define CAP 500 // 2^12 number of chunks in the arena
+#define CAP 32768 // 2^15 number of chunks in the arena
 typedef unsigned int T1; // for convenience
 
 static void show_usage(std::string name)
