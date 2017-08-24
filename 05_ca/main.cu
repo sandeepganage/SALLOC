@@ -23,7 +23,7 @@
 #include <omp.h>
 #include <cuda.h>
 
-#include "salloc_phase3.h"
+#include "salloc.h"
 #include "Event.h"
 #include "GPUHitsAndDoublets.h"
 #include "GPUCACell.h"
