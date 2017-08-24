@@ -13,7 +13,7 @@
 //   limitations under the License.
 #pragma once
 
-#define CHUNK_SZ 32
+#define CHUNK_SZ 100
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
@@ -286,8 +286,8 @@ void kernel_connect(GPUArena<CHUNK_SZ,T1> myArena, const GPUEvent* event, const 
 
             auto& thisCell = cells[globalCellIdx];
             auto innerHitId = thisCell.get_inner_hit_id();
-            auto numberOfPossibleNeighbors = 10;  // somesh: commented because size() is not define on the vector now.
-            //        isOuterHitOfCell[globalFirstHitIdx + innerHitId].size();
+            auto numberOfPossibleNeighbors =   // somesh: commented because size() is not define on the vector now.
+                    myArena.vecSize(isOuterHitOfCell[globalFirstHitIdx + innerHitId]);
             for (auto j = 0; j < numberOfPossibleNeighbors; ++j)
             {
                 unsigned int otherCell = isOuterHitOfCell[globalFirstHitIdx + innerHitId][j];//.m_data[j];
