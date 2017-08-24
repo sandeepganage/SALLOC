@@ -18,9 +18,9 @@ Another code named "cuMalloc.cu" is present in the folder. This file contains co
  and run with the command: 
 	./cuMalloc
  
-Currently, arena allocator SALLOC supports the push_back() and reserve() operations on vectors. There is also support for allocating multiple vectors on the arena. 
-These vectorsare shared  across threads (ie. visible to all threads).
- allocation of multiple vectors on the arena. 
+Currently, arena allocator SALLOC supports allocation of multiple vectors on the arena. 
+These vectors are shared  across threads (ie. visible to all threads).
+ 
 The vector container supports the following thread-safe operations:
 1. push_back()
 2. pop_back()
