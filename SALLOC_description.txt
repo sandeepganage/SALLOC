@@ -15,7 +15,7 @@ It has support for vector container on GPUs.
 	2. The arena is organized as an array of a said 'capacity', divided into chunks.
 	The capacity is user specified.
 
-	3. A 'chunk' contains an array of 'CHUNK_SIZE' of type '<T>'. 
+	3. A 'chunk' contains an array of 'CHUNK_SIZE' of type '<T>'. The type 'T' is also user specified.
 	Other fields in a chunk include *next, *prev, that are pointers to other chunks in the same arena.
 
 	4. A chunk can only contain elements of a single vector. A vector however spans across multiple chunks. 
