@@ -360,6 +360,10 @@ __device__
 int vecSize(T* vec)
 {
    GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   if(vec == NULL) 
+   {
+     printf("Vector does not exist");
+   }
    int count = 0;
 	 while(currentChunk->next != NULL)
 	{
