@@ -25,5 +25,6 @@ The vector container supports the following thread-safe operations:
 1. push_back()
 2. pop_back()
 3. getIndex()
+4. vecSize()
 
 The details about these are mentioned in SALLOC-description.txt in this folder.
