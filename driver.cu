@@ -60,6 +60,10 @@ __global__ void kernel4(GPUArena<CHUNK_SZ,T1> a, T1* v1)
   printf("global index of v1[%d] = %d\n",tid,a.getIndex(v1,tid));
 }
 
+
+
+
+
 int main(int argc, char** argv)
 {
   GPUArena<CHUNK_SZ, T1> arena(CAP);
@@ -70,11 +74,11 @@ int main(int argc, char** argv)
   kernel1<<<1,23>>>(arena, v1, v2, v3);
   //kernel5<<<1,20>>>(arena, v2);
   //kernel6<<<1,20>>>(arena, v3);
-  kernel2<<<1,25>>>(arena, v1,v3);
+  kernel2<<<1,2>>>(arena, v1,v3);
 //  kernel1<<<1,5>>>(arena, v1,v2,v3);
 //  kernel2<<<1,10>>>(arena, v1,v2,v3);
 //  kernel3<<<1,25>>>(arena, v1);
-  kernel4<<<1,10>>>(arena, v1);
+  kernel4<<<1,30>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }

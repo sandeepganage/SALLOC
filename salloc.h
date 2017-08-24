@@ -189,7 +189,7 @@ public:
 __device__ int getIndex(T* vec, int vecIndex)
 {
  GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
- 
+  
  int vecIndexChunk = vecIndex/CHUNK_SIZE ; // determining the chunk id of the vector in which the specified index of the vector will reside 
  int temp = 0; // to count the chunk of the vector the thread is at
  while(currentChunk->next != NULL)
@@ -201,7 +201,7 @@ __device__ int getIndex(T* vec, int vecIndex)
 } 
  
  // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
- if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
+ if(vecIndex < vecSize(vec)-1 ) // the index of the vector is in the range
 {
  // return the corresponding index of arena.
  // computing the corresponding index of arena
@@ -210,7 +210,7 @@ __device__ int getIndex(T* vec, int vecIndex)
 } 
 else // the specified vecIndex is not in vector vec;
 {
- assert(false);
+ //assert(false);
  return -1; // dummy value. Signifies the index could not be found.
 }
 
@@ -345,6 +345,35 @@ else // the specified vecIndex is not in vector vec;
  }
  return tempVal;
 }
+
+/*
+ * Function signature:
+ *
+ * int vecSize(T* vec)
+ *
+ * returns the size of the vector
+ *
+ * */
+
+
+__device__ 
+int vecSize(T* vec)
+{
+   GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   int count = 0;
+	 while(currentChunk->next != NULL)
+	{
+	 currentChunk = currentChunk->next;
+	 count++;
+	} 
+	   
+       // at this point currentChunk is pointing to the last chunk of the vector.
+       int vec_sz = (count * CHUNK_SIZE) + (currentChunk->nextFreeValue) ;    
+       return vec_sz;
+}
+
+
+
 
 };
 
