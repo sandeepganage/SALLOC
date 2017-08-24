@@ -340,6 +340,31 @@ else // the specified vecIndex is not in vector vec;
  return tempVal;
 }
 
+/* Funtion to compute the size of a vector */
+/* Function signature:
+ *
+ * int vecSize(T* vec)
+ *
+ * Returns the size of a vector
+ *
+ * */
+
+
+ __device__ int vecSize(T* vec)
+{
+   GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   int count = 0;
+	 while(currentChunk->next != NULL)
+	{
+	 currentChunk = currentChunk->next;
+	 count++;
+	} 
+	   
+       // at this point currentChunk is pointing to the last chunk of the vector.
+       int vec_sz = (count * CHUNK_SIZE) + (currentChunk->nextFreeValue) ;    
+       return vec_sz;
+}
+
 };
 
 #endif
