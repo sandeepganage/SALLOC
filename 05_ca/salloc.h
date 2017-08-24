@@ -134,8 +134,11 @@ public:
    }
 
  
-#if 1
-
+ /*
+  * Function signature:
+  *  T* createVector(int size)
+  *
+  */
 
    T * createVector(int sz = CHUNK_SIZE) // optional size parameter that defaults to CHUNK_SIZE.
   {
@@ -174,10 +177,19 @@ public:
 // the function will return random values. 
 // The function does not check for array bounds since it does not maintain size of vector or any other meta information.
 
+/*
+ * Function signature:
+ * int getIndex(T* vector, int vectorIndex)
+ *
+ * if vector index is not found in vector, it returns -1.
+ *
+ *
+ * */
+
 __device__ int getIndex(T* vec, int vecIndex)
 {
  GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
- 
+  
  int vecIndexChunk = vecIndex/CHUNK_SIZE ; // determining the chunk id of the vector in which the specified index of the vector will reside 
  int temp = 0; // to count the chunk of the vector the thread is at
  while(currentChunk->next != NULL)
@@ -189,7 +201,7 @@ __device__ int getIndex(T* vec, int vecIndex)
 } 
  
  // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
- if((vecIndexChunk * CHUNK_SIZE + vecIndex % CHUNK_SIZE) == vecIndex) // the index of the vector is found
+ if(vecIndex < vecSize(vec)-1 ) // the index of the vector is in the range
 {
  // return the corresponding index of arena.
  // computing the corresponding index of arena
@@ -198,11 +210,19 @@ __device__ int getIndex(T* vec, int vecIndex)
 } 
 else // the specified vecIndex is not in vector vec;
 {
- assert(false);
+ //assert(false);
  return -1; // dummy value. Signifies the index could not be found.
 }
 
 }
+
+
+/*
+ * Function signature:
+ *
+ * void push_back(T* vector, T elementToPush)
+ *
+ * */
 
 
  __device__ void push_back(T* vec, T ele)
@@ -249,11 +269,23 @@ else // the specified vecIndex is not in vector vec;
    
   }
 
-
   }
+//__syncthreads(); 
+//  if(threadIdx.x == 0)
+//{
+//  currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; 
+//  while(currentChunk->next != NULL) {currentChunk->nextFreeValue = CHUNK_SIZE; currentChunk = currentChunk->next; }
+//}  
 
  }
 
+/*
+ * Function signature:
+ *
+ * T pop_back(T* vector)
+ *
+ * returns '-1 or garbage' if pop_back() fails.
+ * */
 
  __device__ T pop_back(T* vec)
 {
@@ -267,16 +299,15 @@ else // the specified vecIndex is not in vector vec;
   }
  parent = currentChunk->prev;
   
- T tempVal; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
+ T tempVal = -1; // local to thread, to be passed by reference to pop_back() in GPUChunk for setting it aptly.
  
   while(true)
  {
  
-   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0)
+   if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0) // the head chunk of vector is empty
   {
-	printf("Nothing to pop !\n");
+	printf("Vector EMPTY! Nothing to pop.\n");
    	break;
- 
   }
 
   bool status = currentChunk->pop_back(tempVal);
@@ -312,10 +343,40 @@ else // the specified vecIndex is not in vector vec;
   }  
 
  }
+ return tempVal;
+}
+
+/*
+ * Function signature:
+ *
+ * int vecSize(T* vec)
+ *
+ * returns the size of the vector
+ *
+ * */
+
+
+__device__ 
+int vecSize(T* vec)
+{
+   GPUChunk<CHUNK_SIZE,T>* currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec;
+   if(vec == NULL) 
+   {
+     printf("Vector does not exist");
+   }
+   int count = 0;
+	 while(currentChunk->next != NULL)
+	{
+	 currentChunk = currentChunk->next;
+	 count++;
+	} 
+	   
+       // at this point currentChunk is pointing to the last chunk of the vector.
+       int vec_sz = (count * CHUNK_SIZE) + (currentChunk->nextFreeValue) ;    
+       return vec_sz;
 }
 
 
-#endif 
 
 
 };

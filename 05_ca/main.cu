@@ -32,8 +32,7 @@
 #include "host_kernels.h"
 
 
-#define CHUNK_SZ 32 // size of a chunk
-#define CAP 4096 // 2^12 number of chunks in the arena
+#define CAP 500 // 2^12 number of chunks in the arena
 typedef unsigned int T1; // for convenience
 
 static void show_usage(std::string name)
