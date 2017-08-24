@@ -33,7 +33,7 @@
 
 
 #define CHUNK_SZ 32 // size of a chunk
-#define CAP 1048576 // 2^20 number of chunks in the arena
+#define CAP 4096 // 2^12 number of chunks in the arena
 typedef unsigned int T1; // for convenience
 
 static void show_usage(std::string name)
@@ -472,6 +472,9 @@ int main(int argc, char** argv)
         cudaMalloc(&device_theCells[gpuIndex],
                 eventsPreallocatedOnGPU * maxNumberOfLayerPairs * maxNumberOfDoublets
                         * sizeof(GPUCACell));
+// device_isOuterHitOfCell is a vector of pointers to vectors; so it has in effect 3 deferences.
+
+// from the below statement, I get the feeling that device_isOuterHitOfCell is a 2-D vector. check.
 
         device_isOuterHitOfCell[gpuIndex] = arena.createVector(); // somesh: creating a vector(computing the offset) and storing its address in the pointer
 /*********************************************************************************************/
@@ -631,7 +634,7 @@ double start = omp_get_wtime();
 //        debug_input_data<<<1,1,0,streams[streamIndex]>>>(&d_events[streamIndex], &d_doublets[d_firstLayerPairInEvt], &d_layers[d_firstLayerInEvt],d_regionParams,  maxNumberOfHits );
                 kernel_create<<<numberOfBlocks_create,256,0,streams[gpuIndex][streamIndex]>>>(arena, &d_events[gpuIndex][streamIndex], &d_doublets[gpuIndex][d_firstLayerPairInEvt],
                         &d_layers[gpuIndex][d_firstLayerInEvt], &device_theCells[gpuIndex][d_firstLayerPairInEvt*maxNumberOfDoublets],
-                        &device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], &d_foundNtuplets[gpuIndex][streamIndex],d_regionParams[gpuIndex], maxNumberOfDoublets, maxNumberOfHits);
+                        &device_isOuterHitOfCell[gpuIndex], &d_foundNtuplets[gpuIndex][streamIndex],d_regionParams[gpuIndex], maxNumberOfDoublets, maxNumberOfHits);
 // somesh: here we are passing the address of an element in the 2D-vector device_isOuterHitOfCell. So this need not change 
 // (check: is the starting address of vector device_isOuterHitOfCell[gpuIndex] required to be passed to the kernel explicitly, as a separate kernel.) 
 
@@ -644,7 +647,7 @@ double start = omp_get_wtime();
 //                d_regionParams, theThetaCut, thePhiCut,theHardPtCut,maxNumberOfDoublets, maxNumberOfHits);
                 kernel_connect<<<numberOfBlocks_connect,256,0,streams[gpuIndex][streamIndex]>>>(arena, &d_events[gpuIndex][streamIndex],
                         &d_doublets[gpuIndex][d_firstLayerPairInEvt], &device_theCells[gpuIndex][d_firstLayerPairInEvt*maxNumberOfDoublets],
-                        &device_isOuterHitOfCell[gpuIndex][d_firstHitInEvent], d_regionParams[gpuIndex], theThetaCut, thePhiCut,
+                        &device_isOuterHitOfCell[gpuIndex], d_regionParams[gpuIndex], theThetaCut, thePhiCut,
                         theHardPtCut, maxNumberOfDoublets, maxNumberOfHits);
 // somesh: here we are passing the address of an element in the 2D-vector device_isOuterHitOfCell. So this need not change 
 // (check: is the starting address of vector device_isOuterHitOfCell[gpuIndex] required to be passed to the kernel explicitly, as a separate kernel.) 
