@@ -351,7 +351,8 @@ else // the specified vecIndex is not in vector vec;
  *
  * int vecSize(T* vec)
  *
- * returns the size of the vector
+ * returns the size of the vector. 
+ * It returns '0' if the vector is not present or is fully empty.
  *
  * */
 
