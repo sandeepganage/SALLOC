@@ -1,9 +1,12 @@
 
-SALLOC is developed as part of the project "Smart Data Structures in CUDA" with CERN-HSF for GSoC 2017.
+**SALLOC** is developed as part of the project "Smart Data Structures in CUDA" with CERN-HSF for GSoC 2017.
 
-The code is compiled using CUDA 8.0 for NVIDIA Pascal (GeForce GTX 1080) GPU. GCC version used is 5.3.0.
+The code is compiled using CUDA 8.0. GCC version used is 5.3.0.
+
+The code is tested on NVIDIA Pascal (GeForce GTX 1080) GPU. 
 
 The source for arena allocator SALLOC is present in the file "salloc.h"
+
 There is a driver code named "driver.cu" which can be used to test the operations on the vector in the allocator.
 
 The file 'driver.cu' can be compiled like so:
