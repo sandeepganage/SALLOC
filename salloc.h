@@ -1,9 +1,17 @@
 
-/* Features of the memory allocator:
- * 1. createVector([size]) -- initial size of the vector is an optional parameter. Support for multiple vectors on the arena.
+/**
+ * Authors: Somesh Singh, IIT Madras 
+ *          Felice Pantaleo, CERN 
+ */
+
+/*SALLOC: A arena allocator for SIMT architectures in CUDA. */
+
+/* Features of SALLOC:
+ * 1. createVector() -- Support for multiple vectors on the arena.
  * 2. push_back() on vector
  * 3. pop_back() from vector
  * 4. getIndex(): maps the index of a vector to the corrensponding index on the arena. 
+ * 5. vecSize(): get size of the specified vector
  * */
 
 /* The memory allocator does not reclaim the chunks that are freed because of pop_back().
@@ -33,13 +41,13 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 #define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
 
-// Creating the arena
+// Specifying the chunk
  
 template <int CHUNK_SIZE, typename T>
 class GPUChunk {
   public:
     T values[CHUNK_SIZE]; // holds the actual values in the vector in the chunk
-    int nextFreeValue; // to keep track of the elements in a chunk.
+    int nextFreeValue; // keep track of the elements in a chunk
     GPUChunk<CHUNK_SIZE, T> *next; // pointer to the next chunk
     GPUChunk<CHUNK_SIZE, T> *prev; // pointer to the previous chunk
 
@@ -86,11 +94,12 @@ class GPUChunk {
 
 };
 
+// Specifying the arena
 
 template <int CHUNK_SIZE, typename T>
 class GPUArena {
 private:
-    // chunks points to the arena
+    // "chunks" points to the arena
     GPUChunk<CHUNK_SIZE, T> *chunks;
     //total number of chunks
     int capacity;
@@ -104,7 +113,6 @@ public:
       : capacity(_capacity)
     {
       //allocate the main arena storage and set everything to 0 
-      // (important because the counters in each chunk must be )
       checkCudaError(cudaMalloc(&chunks, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity));
       checkCudaError(cudaMemset(chunks, 0, sizeof(GPUChunk<CHUNK_SIZE, T>) * capacity));
 
@@ -135,7 +143,7 @@ public:
 
  
  /*
-  * Function signature:
+  *  Function signature:
   *  T* createVector(int size)
   *
   */
@@ -151,22 +159,20 @@ public:
     
 
    
-   // The starting address of the array "chunks" (the arena) on the GPU is already available on the CPU, in the variable chunks. We can use it as it is.
-   
    GPUChunk<CHUNK_SIZE,T> * offsettedAddr = chunks; // offsettedAddr has the starting address of the arena.
    
    // computing the address of the chunk in the arena (by adding offset*sizeof(GPUCHUNK<..>) to "chunks")
    offsettedAddr += h_count * sizeof(GPUChunk<CHUNK_SIZE, T>); // number of bytes, thus the offset
-   
-   // Not done: h_count should be incremented by ceil(sz/CHUNK_SIZE) for reserve() operation. Also, a link between these should be created.   
-  ++h_count; // incrementing the value of nextFreeChunk so that it now points to a new chunk.
+
+   ++h_count; // incrementing the value of nextFreeChunk so that it now points to a new chunk.
   // The current chunk is reserved for a vector.
   checkCudaError(cudaMemcpy(nextFreeChunk_d, &h_count, sizeof(int), cudaMemcpyHostToDevice));
   return (T*) offsettedAddr; // address on GPU returned
  // it is cast to (T*) so that it can be stepped in multiples of sizeof(T)
+
+   // For future versions : h_count should be incremented by ceil(sz/CHUNK_SIZE) for reserve() operation. Also, a link between these chunks should be created.   
   }  
 
- // getIndex will map the vector "index" to arena index.
  // usage:
  // int arenaIndex = getIndex(v, vectorindex);
  
@@ -178,6 +184,10 @@ public:
 // The function does not check for array bounds since it does not maintain size of vector or any other meta information.
 
 /*
+ * getIndex will map the vector "index" to arena index.
+ * Usage:
+ *   int arenaIndex = getIndex(v, vectorindex);
+ *
  * Function signature:
  * int getIndex(T* vector, int vectorIndex)
  *
@@ -270,12 +280,6 @@ else // the specified vecIndex is not in vector vec;
   }
 
   }
-//__syncthreads(); 
-//  if(threadIdx.x == 0)
-//{
-//  currentChunk = (GPUChunk<CHUNK_SIZE,T>*) vec; 
-//  while(currentChunk->next != NULL) {currentChunk->nextFreeValue = CHUNK_SIZE; currentChunk = currentChunk->next; }
-//}  
 
  }
 
@@ -327,7 +331,6 @@ else // the specified vecIndex is not in vector vec;
       *uvw_d = 0;
      }
      while(*uvw_d == 1); // barrier for all threads doing pop_back().
-     //currentChunk = parent;	
     } 
        
    else if(currentChunk->prev == NULL && parent != NULL) //  the thread is pointing to a node that is not a part of any vector

@@ -22,7 +22,7 @@ __global__ void kernel2(GPUArena<CHUNK_SZ,T1> a, T1* v1, T1* v3)
 {
   unsigned tid = threadIdx.x;
   printf("pop value from v1 = %d\n",a.pop_back(v1));
-   a.push_back(v3,tid); printf("push_back in v3\n");
+  a.push_back(v3,tid); printf("push_back in v3\n");
   printf("pop value from v3 = %d\n",a.pop_back(v3));
 }
 
