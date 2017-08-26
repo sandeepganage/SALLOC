@@ -1,7 +1,14 @@
 
-**SALLOC** is developed as part of the project "Smart Data Structures in CUDA" with CERN-HSF for GSoC 2017.
+# SALLOC: Smart allocators for SIMT architectures 
 
-The code is compiled using CUDA 8.0. GCC version used is 5.3.0.
+**SALLOC** is developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _GSoC 2017_.
+
+## Requirements
+
+### Linux
+
+- CUDA version >= 8.0
+- gcc version >= 5.3.0
 
 The code is tested on NVIDIA Pascal (GeForce GTX 1080) GPU. 
 
