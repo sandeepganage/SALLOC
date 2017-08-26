@@ -50,5 +50,5 @@ nvcc driver.cu -std=c++11 -o driver
 ## Developers
 
 - Felice Pantaleo (felice.pantaleo (at) cern.ch)
-- Somesh Singh (somesh.singh (at) gmail.com)
+- Somesh Singh (somesh.singh1992@gmail.com)
 
