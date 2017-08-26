@@ -201,7 +201,7 @@ __device__ int getIndex(T* vec, int vecIndex)
 } 
  
  // at this point currentChunk either points to the last chunk of the vector or to the chunk containing the vecIndex
- if(vecIndex < vecSize(vec)-1 ) // the index of the vector is in the range
+ if(vecIndex < vecSize(vec)) // the index of the vector is in the range
 {
  // return the corresponding index of arena.
  // computing the corresponding index of arena

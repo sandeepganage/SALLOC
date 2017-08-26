@@ -1,4 +1,4 @@
-// This is the driver program for SALLOC
+// This is the sample program to illustrate the use of SALLOC
 
 #include <stdio.h>
 #include <cuda.h>
@@ -40,10 +40,10 @@ int main(int argc, char** argv)
   
   T1 * v1 = arena.createVector(); 
   T1 * v2 = arena.createVector(); 
-  T1 * v3 = arena.createVector(); // we can have a parameter 'size' which is set to CHUNK_SZ by default.
+  T1 * v3 = arena.createVector(); 
   kernel1<<<1,23>>>(arena, v1, v2, v3);
-  kernel2<<<1,2>>>(arena, v1,v3);
-  kernel3<<<1,30>>>(arena, v1);
+  kernel2<<<1,21>>>(arena, v1,v3);
+  kernel3<<<1,8>>>(arena, v1);
   cudaDeviceSynchronize();
   return 0;
 }
