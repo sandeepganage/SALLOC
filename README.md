@@ -10,6 +10,27 @@
 - CUDA version >= 8.0
 - gcc version >= 5.3.0
 
+## Getting Started
+
+### Getting the code
+
+- clone the code into a directory called SALLOC
+```
+git clone --branch=master https://github.com/felicepantaleo/SALLOC
+```
+
+- No installation or build is required. 
+    - Include "salloc.h" in the CUDA code and use.
+    
+## Running the Tests
+
+
+## Developers
+
+- Felice Pantaleo (felice.pantaleo (at) cern.ch)
+- Somesh Singh (somesh.singh (at) gmail.com)
+
+
 The code is tested on NVIDIA Pascal (GeForce GTX 1080) GPU. 
 
 The source for arena allocator SALLOC is present in the file "salloc.h"
