@@ -3,6 +3,17 @@
 
 **SALLOC** is developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _GSoC 2017_.
 
+## Features
+
+- Thread-safe arena allocator for GPUs in CUDA.
+- Supports thread-safe vector container in CUDA.
+- Support for multiple vectors on the arena. These vectors are shared across threads.
+- The vector container supports the following operations:
+    1. push_back()
+    2. pop_back()
+    3. getIndex()
+    4. vecSize() 
+
 ## Requirements
 
 ### Linux
@@ -18,12 +29,22 @@
 ```
 git clone --branch=master https://github.com/felicepantaleo/SALLOC
 ```
+- The source for arena allocator SALLOC is present in the file "salloc.h"
 
 - No installation or build is required. 
-    - Include "salloc.h" in the CUDA code and use.
-    
-## Running the Tests
 
+- Include "salloc.h" (with the proper path) in the CUDA code and use.
+
+## Using SALLOC in your code
+
+- SALLOC is tested on NVIDIA Pascal (GeForce GTX 1080) GPU.
+- *driver.cu* contains a sample program that uses SALLOC.
+    - compile *driver.cu* and execute
+```    
+nvcc driver.cu -std=c++11 -o driver
+
+./driver
+```
 
 ## Developers
 
@@ -31,9 +52,9 @@ git clone --branch=master https://github.com/felicepantaleo/SALLOC
 - Somesh Singh (somesh.singh (at) gmail.com)
 
 
-The code is tested on NVIDIA Pascal (GeForce GTX 1080) GPU. 
+ 
 
-The source for arena allocator SALLOC is present in the file "salloc.h"
+
 
 There is a driver code named "driver.cu" which can be used to test the operations on the vector in the allocator.
 
