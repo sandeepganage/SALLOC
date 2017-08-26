@@ -31,6 +31,7 @@ __global__ void kernel3(GPUArena<CHUNK_SZ,T1> a, T1* v1)
 {
   unsigned tid = threadIdx.x;
   printf("global index of v1[%d] = %d\n",tid,a.getIndex(v1,tid));
+  printf("Current size of v1: %d\n",a.vecSize(v1));
 }
 
 
