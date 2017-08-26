@@ -173,20 +173,9 @@ public:
    // For future versions : h_count should be incremented by ceil(sz/CHUNK_SIZE) for reserve() operation. Also, a link between these chunks should be created.   
   }  
 
- // usage:
- // int arenaIndex = getIndex(v, vectorindex);
- 
-
-// this function returns the index of the arena for a corresponding index of vector
-//
-// It is the responsibility of the user to check for array bounds when specifying index of vector. If the vector bound is incorrect, 
-// the function will return random values. 
-// The function does not check for array bounds since it does not maintain size of vector or any other meta information.
 
 /*
  * getIndex will map the vector "index" to arena index.
- * Usage:
- *   int arenaIndex = getIndex(v, vectorindex);
  *
  * Function signature:
  * int getIndex(T* vector, int vectorIndex)
@@ -228,6 +217,8 @@ else // the specified vecIndex is not in vector vec;
 
 
 /*
+ * push_back() pushes the specified element in a vector
+ *
  * Function signature:
  *
  * void push_back(T* vector, T elementToPush)
@@ -284,6 +275,9 @@ else // the specified vecIndex is not in vector vec;
  }
 
 /*
+ * pop_back() pops an element from a vector
+ *
+ *
  * Function signature:
  *
  * T pop_back(T* vector)
@@ -350,11 +344,12 @@ else // the specified vecIndex is not in vector vec;
 }
 
 /*
+ * vecSize() returns the size of the specified vector.
+ *
  * Function signature:
  *
  * int vecSize(T* vec)
  *
- * returns the size of the vector. 
  * It returns '0' if the vector is not present or is fully empty.
  *
  * */
