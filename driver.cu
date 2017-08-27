@@ -1,4 +1,4 @@
-// This is the sample program to illustrate the use of SALLOC
+// This is the sample program to illustrate the usage of SALLOC
 
 #include <stdio.h>
 #include <cuda.h>

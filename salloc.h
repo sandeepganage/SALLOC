@@ -1,10 +1,11 @@
 
 /**
- * Authors: Somesh Singh, IIT Madras 
- *          Felice Pantaleo, CERN 
- */
-
-/*SALLOC: An arena allocator for SIMT architectures in CUDA. */
+ * SALLOC: An arena allocator for SIMT architectures in CUDA.
+ *
+ * @author Somesh Singh, IIT Madras 
+ * @author Felice Pantaleo, CERN 
+ *
+ **/
 
 /* Features of SALLOC:
  * 1. createVector() -- Support for multiple vectors on the arena.
@@ -14,8 +15,7 @@
  * 5. vecSize(): get size of the specified vector
  * */
 
-/* The memory allocator does not reclaim the chunks that are freed because of pop_back().
- * */
+/* The memory allocator does not reclaim the chunks that are freed because of pop_back(). */
 
 
 #ifndef SALLOC_H
@@ -374,9 +374,6 @@ int vecSize(T* vec)
        int vec_sz = (count * CHUNK_SIZE) + (currentChunk->nextFreeValue) ;    
        return vec_sz;
 }
-
-
-
 
 };
 
