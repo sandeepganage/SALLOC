@@ -4,7 +4,7 @@
  *          Felice Pantaleo, CERN 
  */
 
-/*SALLOC: A arena allocator for SIMT architectures in CUDA. */
+/*SALLOC: An arena allocator for SIMT architectures in CUDA. */
 
 /* Features of SALLOC:
  * 1. createVector() -- Support for multiple vectors on the arena.
