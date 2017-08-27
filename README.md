@@ -14,7 +14,7 @@
     3. getIndex()
     4. vecSize() 
 
-A detailed description about these can be found in *SALLOC-description.txt*
+A detailed description about these can be found in *SALLOC_description.txt*
 
 ## Requirements
 
