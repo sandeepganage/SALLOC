@@ -3,7 +3,6 @@
  * SALLOC: An arena allocator for SIMT architectures in CUDA.
  *
  * @author Somesh Singh, IIT Madras 
- * @author Felice Pantaleo, CERN 
  *
  **/
 
