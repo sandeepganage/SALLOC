@@ -33,7 +33,7 @@ A detailed documentation on *SALLOC* can be found in [*SALLOC_description.txt*](
 
 - Clone the code into a directory called SALLOC
     ```
-    git clone --branch=master https://github.com/felicepantaleo/SALLOC
+    git clone --branch=master https://github.com/ssomesh/SALLOC
     ```
 - The source for arena allocator SALLOC is present in the file *salloc.h*
 
