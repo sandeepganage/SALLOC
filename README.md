@@ -18,7 +18,7 @@
 
 ## Documentation
 
-A detailed documentation on *SALLOC* can be found in *SALLOC_description.txt*.
+A detailed documentation on *SALLOC* can be found in [*SALLOC_description.txt*](SALLOC_description.txt).
 
 ## Requirements
 
@@ -31,10 +31,10 @@ A detailed documentation on *SALLOC* can be found in *SALLOC_description.txt*.
 
 ### Getting the code
 
-- clone the code into a directory called SALLOC
-```
-git clone --branch=master https://github.com/felicepantaleo/SALLOC
-```
+- Clone the code into a directory called SALLOC
+    ```
+    git clone --branch=master https://github.com/felicepantaleo/SALLOC
+    ```
 - The source for arena allocator SALLOC is present in the file *salloc.h*
 
 - No installation or build is required. 
@@ -43,12 +43,12 @@ git clone --branch=master https://github.com/felicepantaleo/SALLOC
 
 - Include "salloc.h" (with the proper path) in the CUDA code and use.
 - *driver.cu* contains a sample program that uses SALLOC.
-    - compile *driver.cu* and execute
-```    
-nvcc driver.cu -std=c++11 -o driver
-
-./driver
-```
+    - Compile *driver.cu* and execute
+        ```    
+        nvcc driver.cu -std=c++11 -o driver
+    
+        ./driver
+        ```
 - SALLOC has been tested on NVIDIA Pascal (GeForce GTX 1080) GPU.
 
 ## TODOs
