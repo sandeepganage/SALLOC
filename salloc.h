@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 
 /**
  * SALLOC: An arena allocator for SIMT architectures in CUDA.
@@ -236,7 +234,7 @@ else // the specified vecIndex is not in vector vec;
   {
     bool status = currentChunk->push_back(ele); 
     if(status == true) // push_back succeded
-	break;
+  break;
     
     else // chunk is full 
   {
@@ -305,8 +303,8 @@ else // the specified vecIndex is not in vector vec;
  
    if (currentChunk == (GPUChunk<CHUNK_SIZE,T>*) vec &&  ((GPUChunk<CHUNK_SIZE,T>*) vec) ->nextFreeValue <= 0) // the head chunk of vector is empty
   {
-	printf("Vector EMPTY! Nothing to pop.\n");
-   	break;
+  printf("Vector EMPTY! Nothing to pop.\n");
+    break;
   }
 
   bool status = currentChunk->pop_back(tempVal);
@@ -365,12 +363,12 @@ int vecSize(T* vec)
      printf("Vector does not exist");
    }
    int count = 0;
-	 while(currentChunk->next != NULL)
-	{
-	 currentChunk = currentChunk->next;
-	 count++;
-	} 
-	   
+   while(currentChunk->next != NULL)
+  {
+   currentChunk = currentChunk->next;
+   count++;
+  } 
+     
        // at this point currentChunk is pointing to the last chunk of the vector.
        int vec_sz = (count * CHUNK_SIZE) + (currentChunk->nextFreeValue) ;    
        return vec_sz;
@@ -380,4 +378,3 @@ int vecSize(T* vec)
 
 #endif
 
->>>>>>> delta
