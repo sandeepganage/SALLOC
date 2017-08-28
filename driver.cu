@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // This is the sample program to illustrate the usage of SALLOC
 
 #include <stdio.h>
@@ -50,4 +48,4 @@ int main(int argc, char** argv)
   cudaDeviceSynchronize();
   return 0;
 }
->>>>>>> delta
+
