@@ -49,6 +49,11 @@ nvcc driver.cu -std=c++11 -o driver
 ```
 - SALLOC has been tested on NVIDIA Pascal (GeForce GTX 1080) GPU.
 
+## TODOs
+
+- Support **resize()** operation on *vector* container allocated on the arena.
+- Support reclaiming of free chunks in arena to better utilize the space on the arena.
+
 ## Developers
 
 - Felice Pantaleo (felice.pantaleo (at) cern.ch)
