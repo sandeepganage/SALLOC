@@ -1,7 +1,9 @@
 
 # SALLOC: Smart allocators for SIMT architectures 
 
-**SALLOC** is developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _GSoC 2017_.
+**SALLOC** is a thread-safe arena allocator in CUDA.
+
+*SALLOC* has been developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _GSoC 2017_.
 
 ## Features
 
