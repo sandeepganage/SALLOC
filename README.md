@@ -52,7 +52,7 @@ nvcc driver.cu -std=c++11 -o driver
 ## TODOs
 
 - Support **resize()** operation on *vector* container allocated on the arena.
-- Support reclaiming of free chunks in arena to better utilize the space on the arena.
+- Support reclaiming of free chunks in the arena to better utilize the space on the arena.
 
 ## Developers
 
