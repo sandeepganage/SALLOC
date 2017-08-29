@@ -3,7 +3,7 @@
 
 **SALLOC** is a thread-safe [*arena allocator*](https://en.wikipedia.org/wiki/Region-based_memory_management) (memory manager) in CUDA.
 
-*SALLOC* has been developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _GSoC 2017_.
+*SALLOC* has been developed as part of the project "Smart Data Structures in CUDA" with _CERN-HSF_ for _Google Summer of Code 2017_.
 
 ## Features
 
