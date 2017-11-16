@@ -150,7 +150,7 @@ public:
    T * createVector(int sz = CHUNK_SIZE) // optional size parameter that defaults to CHUNK_SIZE.
   {
     
-    int h_count; // a host variable to store the current value of nextFreeChunk_d
+     int h_count; // a host variable to store the current value of nextFreeChunk_d
 
     
      /** copying of nextFreeChunk_d to h_count **/
@@ -377,4 +377,6 @@ int vecSize(T* vec)
 };
 
 #endif
+
+
 
