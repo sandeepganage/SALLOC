@@ -39,12 +39,15 @@ inline void __checkCudaError__(T code, const char *func, const char *file, int l
 
 #define checkLastCudaError() checkCudaError( (cudaGetLastError()) )
 
-
+template <int CHUNK_SIZE, typename T> class GPUArena ; // forward declaration
 // Specifying the chunk
  
 template <int CHUNK_SIZE, typename T>
 class GPUChunk {
-  public:
+
+   friend class GPUArena<CHUNK_SIZE,T>;  // GPUArena has been granted full access to anything related to GPUChunk
+   // everyone else is blocked out.
+    private:
     T values[CHUNK_SIZE]; // holds the actual values in the vector in the chunk
     int nextFreeValue; // keep track of the elements in a chunk
     GPUChunk<CHUNK_SIZE, T> *next; // pointer to the next chunk
